@@ -1,144 +1,187 @@
-# Graduaatsproef Programmeren
+# 🦷 AI-Gestuurd Callcenter voor Tandartspraktijken
 
-Deze repository bevat LaTeX sjablonen voor gebruik bij het opmaken van je graduaatsproef:
+> **Graduaatsproef Programmeren | HOGENT | Academiejaar 2025-2026**
 
-- [Het onderzoeksvoorstel](./voorstel/)
-- [De graduaatsproef zelf](./gradproef/)
-- [Een poster](./poster/)
+## 📋 Overzicht
 
-**LET OP.** Voor het academiejaar 2022-2023 zijn er nieuwe sjablonen gepubliceerd die conform zijn met de huidige huisstijl van HOGENT.
+Dit project ontwikkelt een **AI-gestuurd inbound callcenter** voor tandartspraktijken. Het systeem automatiseert telefonische patiëntcommunicatie door gebruik te maken van:
 
-## Aan de slag
+- **Twilio** — Programmeerbare telefonie (spraakherkenning, Text-to-Speech)
+- **OpenAI GPT-4o** — Natuurlijke taalverwerking met function calling
+- **ASP.NET Core** — Backend API
+- **Microsoft Azure** — Hosting en secrets management
 
-Om deze sjablonen te gebruiken, kan je de repository downloaden via de groene knop rechtsboven deze pagina. Het is beter een ZIP te downloaden en zelf een Github repository te initialiseren dan deze repository te klonen. In het laatste geval neem je dan immers ook de gehele historiek van wijzigingen in het sjabloon zelf mee en dat is niet relevant voor jouw werk. Maak daarna een Github-repository voor jezelf aan (`git init .`). Gebruik altijd een versiebeheersysteem om een LaTeX-document bij te houden! Creëer een Github-repository die je deelt met je promotor en/of andere belanghebbenden.
+### 🎯 Functionaliteiten
 
-Gebruik deze repository ook om andere artefacten/deelresultaten van je graduaatsproef bij te houden, zoals nota's, ruwe resultaten, scripts/programmacode, enz. Gebruik bij voorkeur tekstgebaseerde bestandsformaten, bijvoorbeeld Markdown ipv Word-documenten of CSV (Comma Separated Values) ipv Excel-werkbladen.
+| Functie | Beschrijving |
+|---------|-------------|
+| 🔍 Klant opzoeken | Patiëntgegevens ophalen via telefoonnummer |
+| ❌ Afspraak annuleren | Bestaande afspraak annuleren na bevestiging |
+| 📅 Afspraak verzetten | Afspraak verplaatsen naar nieuw tijdstip |
+| 📝 Wachtlijst | Patiënt toevoegen aan wachtlijst |
+| 📞 Doorverbinden | Gesprek doorschakelen naar praktijk |
+| 🌍 Meertalig | Nederlands, Engels en Frans |
 
-## Lettertypes
+---
 
-Je hebt de volgende lettertypes nodig. Ze zijn meegeleverd [in deze repository](fonts/), dus je kan ze makkelijk installeren.
+## 📁 Projectstructuur
 
-- Montserrat (officieel hoofdlettertype van de HOGENT huisstijl)
+```
+├── gradproef/              # 📄 LaTeX thesis (graduaatsproef)
+│   ├── MavzerAbdilBP.tex   #    Hoofddocument
+│   ├── inleiding.tex       #    Introductie
+│   ├── standvanzaken.tex   #    Literatuurstudie
+│   ├── methodologie.tex    #    Onderzoeksmethodiek
+│   ├── implementatie.tex   #    Technische implementatie
+│   ├── resultaten.tex      #    Resultaten & leerpunten
+│   ├── conclusie.tex       #    Conclusie
+│   └── gradproef.bib       #    Bibliografie
+│
+├── voorstel/               # 📝 Onderzoeksvoorstel
+│   ├── MavzerAbdil-BPvoorstel.tex
+│   └── voorstel-inhoud.tex
+│
+├── poster/                 # 🖼️ Conferentieposter
+│
+├── graphics/               # 📊 Afbeeldingen en diagrammen
+│
+├── fonts/                  # 🔤 Lettertypes (Montserrat, Fira)
+│
+├── docker/                 # 🐳 Docker build scripts
+│
+└── output/                 # 📦 Gecompileerde PDF's
+```
+
+---
+
+## 🏗️ Architectuur
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Patiënt   │────▶│   Twilio    │────▶│  ASP.NET    │
+│  (Telefoon) │◀────│  (Voice)    │◀────│  Core API   │
+└─────────────┘     └─────────────┘     └──────┬──────┘
+                                               │
+                    ┌─────────────┐     ┌──────▼──────┐
+                    │  TurnUp     │◀────│   OpenAI    │
+                    │    API      │     │   GPT-4o    │
+                    └─────────────┘     └─────────────┘
+```
+
+**Gespreksflow:**
+1. Patiënt belt → Twilio ontvangt oproep
+2. Twilio stuurt webhook naar ASP.NET Core
+3. Spraak wordt getranscribeerd (Speech-to-Text)
+4. OpenAI verwerkt input en bepaalt actie
+5. Function calling voert actie uit (bijv. afspraak opzoeken)
+6. AI formuleert antwoord → Twilio spreekt uit (Text-to-Speech)
+
+---
+
+## 🛠️ Technologieën
+
+| Technologie | Versie | Doel |
+|-------------|--------|------|
+| .NET | 8.0 | Backend framework |
+| ASP.NET Core | 8.0 | Web API |
+| OpenAI API | GPT-4o | Taalverwerking & function calling |
+| Twilio | Voice API | Telefonie & spraak |
+| Azure App Service | — | Hosting |
+| Azure Key Vault | — | Secrets management |
+| Azure SQL Database | — | Opslag opnames & transcripties |
+| GitHub Actions | — | CI/CD |
+
+---
+
+## 📄 Documenten
+
+| Document | Beschrijving | Build |
+|----------|-------------|-------|
+| Graduaatsproef | Volledige thesis | `./make_thesis.sh` |
+| Onderzoeksvoorstel | Research proposal | `./make_voorstel.sh` |
+| Poster | Conferentieposter | `./make_poster.sh` |
+
+---
+
+## 🚀 Bouwen
+
+### Vereisten
+
+- LaTeX distributie (TeX Live of MikTeX)
+- XeLaTeX compiler
+- Biber voor bibliografie
+- Geïnstalleerde fonts: Montserrat, Fira Code, Fira Math
+
+### Lokaal bouwen
+
+```bash
+# Thesis compileren
+./make_thesis.sh
+
+# Onderzoeksvoorstel compileren
+./make_voorstel.sh
+
+# Poster compileren
+./make_poster.sh
+```
+
+### Via Docker
+
+```bash
+docker build -t bpimg ./docker
+docker run --rm -v "$PWD":/bp bpimg sh /bp/docker/render_thesis.sh gradproef
+```
+
+---
+
+## 👤 Auteur
+
+**Abdil Mavzer**  
+📧 [abdil.mavzer@student.hogent.be](mailto:abdil.mavzer@student.hogent.be)  
+🎓 Graduaat in het Programmeren — HOGENT
+
+### Begeleiding
+
+- **Co-promotor:** Jona Decubber (TurnUp)
+
+---
+
+## 📚 Bronnen
+
+- [Twilio Voice Documentation](https://www.twilio.com/docs/voice)
+- [OpenAI Function Calling](https://platform.openai.com/docs/guides/function-calling)
+- [Azure Key Vault](https://docs.microsoft.com/azure/key-vault/)
+- [ASP.NET Core Documentation](https://docs.microsoft.com/aspnet/core/)
+
+---
+
+## 📜 Licentie
+
+Dit project is ontwikkeld in het kader van de graduaatsopleiding Programmeren aan HOGENT.
+
+---
+
+<details>
+<summary>📖 LaTeX Sjabloon Informatie</summary>
+
+### Lettertypes
+
+Je hebt de volgende lettertypes nodig (meegeleverd in `fonts/`):
+
+- Montserrat (officieel hoofdlettertype HOGENT huisstijl)
 - Fira Code (monogespatieerde tekst)
 - Fira Math (wiskundige formules)
 
-N.B. Lettertypes installeren kan je op zowel Windows, macOS als Linux door te dubbelklikken op het .otf-bestand en op de knop "Installeren" te klikken in het preview-venster. Je kan de bestanden ook kopiëren naar de directory met lettertypes: `C:\Windows\Fonts` voor Windows, `/Library/Fonts` of `~/Library/Fonts` op macOS, `/usr/share/fonts` of `~/.local/share/fonts` op Linux.
+### LaTeX Editor
 
-## LaTeX editor, bibliografie
-
-Qua editors voor LaTeX zijn er verschillende keuzemogelijkheden. We raden [TeXstudio](https://www.texstudio.org/) aan en [Jabref](https://www.jabref.org/) voor het bijhouden van een bibliografische databank. 
-
-Om Texstudio goed te kunnen gebruiken, zal je ook [MikTex](https://miktex.org/download) moeten afhalen en installeren (of TexLive). 
-
-Ook Visual Studio Code is een zeer goede LaTeX-editor (via de plugin LaTeX Workshop van James Yu).
+Aanbevolen editors:
+- [TeXstudio](https://www.texstudio.org/)
+- [Visual Studio Code](https://code.visualstudio.com/) met LaTeX Workshop plugin
+- [JabRef](https://www.jabref.org/) voor bibliografie
 
 ### TeXstudio configureren
 
-Kies in het menu voor Options > Configure TeXstudio en pas volgende instellingen aan:
+- Build > Default compiler: `xelatex`
+- Build > Default Bibliography Tool: `Biber`
 
-- Build:
-    - Default compiler: "xelatex"
-    - Default Bibliography Tool: "Biber"
-- Commands:
-    - Latexmk: `xelatex -shell-escape -synctex=1 -interaction=nonstopmode -file-line-error %`
-- Editor:
-    - Indentation mode: Indent and Unindent Automatically
-    - Replace Indentation Tab by Spaces: Aanvinken
-    - Replace Tab in Text by spaces: Aanvinken
-    - Replace Double Quotes: English Quotes: ‘‘’’
-
-Tips:
-
-- Gebruik functietoets **F5** om het document te compileren en het resultaat te bekijken.
-- Als na compilatie de bibliografie niet zichtbaar is, probeer die dan expliciet te compileren met **F8** en daarna opnieuw **F5**
-
-### Jabref
-
-Kies voor Options > Preferences en pas volgende instellingen aan:
-
-- General:
-    - Default encoding: UTF-8
-    - Default library mode: biblatex
-- File:
-    - (optioneel) Main file directory: geef hier de directory waar je de PDFs van gevonden bronnen bijhoudt. Als je dezelfde bestandsnaam gebruikt als je BibtexKey, dan vindt JabRef de PDF en kan je die openen vanuit het overzicht.
-
-## Graduaatsproef in het Engels
-
-Het graduaatsproefsjabloon is voorzien op tekst in hetzij Nederlands, hetzij Engels. Wanneer je je graduaatsproef in het Engels schrijft, pas je de instellingen van de documentclass aan. Nu staat er:
-
-```latex
-\documentclass[dutch,dit,thesis]{hogentreport}
-```
-
-Je kan `dutch` verwijderen of vervangen door `english`.
-
-Aandachtspunten:
-
-- Het voorblad blijft in het Nederlands (behalve je titel), en dit is ook de bedoeling
-- Pas de naam van het diploma aan (regel met commando`\degreesought{}`) in *Associate Degree in Programming*.
-- Je moet in dit geval ook een Nederlandse vertaling van je samenvatting voorzien. Het sjabloon houdt daar ook rekening mee:
-    - De samenvatting in de hoofdtaal van het document komt [op lijn 40 van het LaTeX-bestand](https://github.com/HoGentPRG/gradproef-latex-sjabloon/blob/master/gradproef/samenvatting.tex#L40)
-    - De Nederlandse vertaling ervan komt [op lijn 31](https://github.com/HoGentPRG/gradproef-latex-sjabloon/blob/master/gradproef/samenvatting.tex#L31)
-
-## Scripts voor compileren, Github Actions
-
-LaTeX correct opzetten vraagt wat moeite en is in het bijzonder op Windows niet altijd even evident. Daarom hebben we enkele scripts voorzien die het proces automatiseren en de meest voorkomende fouten vermijden. Concreet wordt er een **Docker container-image** gebouwd waarin alle nodige packages en lettertypes geïnstalleerd worden zodat de compilatie foutloos kan uitgevoerd worden.
-
-Dat impliceert dus dat je Docker moet geïnstalleerd hebben op jouw laptop!
-
-- Windows, MacOS: [Docker Desktop](https://docs.docker.com/desktop/)
-- Ubuntu, Debian, enz.: De Docker engine uit de repositories van de distributie of [de builds van Docker zelf](https://docs.docker.com/engine/install/ubuntu/)
-- Fedora: installeer Podman uit de officiële repos
-
-Om je graduaatsproef te compileren, voer je dan op Windows het volgende commando uit (in een CMD of PowerShell-console, in de directory met de scripts):
-
-```console
-> make_thesis.bat
-```
-
-Op Mac of Linux (in een Bash-console):
-
-```console
-$ ./make_thesis.sh
-```
-
-Om je graduaatsproef*voorstel* en poster te compileren zijn er gelijkaardige scripts (`make_voorstel.bat`/`.sh` en `make_poster.bat`/`.sh`).
-
-De resulterende PDF-bestanden vind je in de directory `output/`, die aangemaakt wordt indien nodig.
-
-**Let op!** Als je codefragmenten in je graduaatsproef opneemt die opgemaakt worden met `minted`, dan moet je in het hoofddocument zorgen dat de optie `outputdir` van de `minted`-package ingesteld wordt op `../output`. Anders zal de compilatie mislukken. Je kan regel 24 uit commentaar halen (en regel 21 uitcommentariëren of verwijderen):
-
-```latex
-\usepackage[section,outputdir=../output]{minted}
-```
-
-De eerste keer dat je dit script uitvoert, zal het compilatieproces langer duren: eerst moet immers een Docker-image gebouwd worden waarin de nodige packages geïnstalleerd zijn. Een eerste LaTeX-compilatie duurt ook vaak langer dan de volgende.
-
-### Automatische compilatie op Github Actions
-
-Als je een Github-repository aanmaakt voor je graduaatsproef (wat we sterk aanbevelen!), dan zal telkens je nieuwe tekst naar Github pusht, jouw graduaatsproef automatisch gecompileerd worden. Dit is geconfigureerd in `.github/workflow/docker-tex-to-pdf.yml`. Het compilatieproces wordt uitgevoerd op de Github-servers en de resulterende PDF- en logbestanden (voor troublehshooting) worden ter beschikking gehouden en kan je [downloaden](https://docs.github.com/en/actions/managing-workflow-runs/downloading-workflow-artifacts).
-
-Deze "artefacten" worden niet onbeperkt bijgehouden: na 2 dagen worden de meesten verwijderd. Je kan vermijden dat een PDF verwijderd wordt door een tag toe te kennen aan de commit. De meest recente versie wordt ook bijgehouden (max. 90 dagen).
-
-## Vragen, fouten, verbeteringen
-
-Bugs, vragen voor verbeteringen, enz. zijn welkom! Je kan die registreren via de Issues. Je kan zelf ook verbeteringen aanbrengen via Pull Requests.
-
-## Bijdragen
-
-- De vormgeving van het graduaatsproefsjabloon is gebaseerd op het werk van [Pieter van der Kloet](https://github.com/pvdk/hogent-latex-thesis). Dat sjabloon wordt nu [hier verder onderhouden](https://github.com/HoGentTIN/latex-hogent-report) door Bert Van Vreckem
-- Het sjabloon voor het graduaatsproefvoorstel [wordt hier bijgehouden](https://github.com/HoGentPRG/latex-hogent-article).
-
-Volgende personen hebben bijgedragen aan deze sjablonen:
-
-- Bert Van Vreckem
-- Chantal Teerlinck
-- Jan Willem
-- Jens Buysse
-- Jeroen Maelbrancke
-- Jonas Verhofsté
-- Matts Devriendt
-- Niels Corneille
-- Patrick Van Brussel
-- Simon Rondelez
-- Luc Vervoort
+</details>

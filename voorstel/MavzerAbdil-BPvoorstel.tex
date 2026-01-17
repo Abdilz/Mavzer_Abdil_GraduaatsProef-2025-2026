@@ -9,6 +9,11 @@
 % Invoegen bibliografiebestand
 \addbibresource{voorstel.bib}
 
+%% Wijzig "Bibliografie" naar "Bronnenlijst"
+\DefineBibliographyStrings{dutch}{
+    bibliography = {Bronnenlijst},
+}
+
 % Informatie over de opleiding, het vak en soort opdracht
 \studyprogramme{Graduaat in het Programmeren}
 \course{Graduaatsproef}
@@ -41,11 +46,6 @@ Dit onderzoeksvoorstel beschrijft de ontwikkeling van een AI-gestuurd inbound ca
 % De hoofdtekst van het voorstel zit in een apart bestand, zodat het makkelijk
 % kan opgenomen worden in de bijlagen van de graduaatsproef zelf.
 \input{voorstel-inhoud}
-
-%% Wijzig "Bibliografie" naar "Bronnenlijst"
-\DefineBibliographyStrings{dutch}{
-    bibliography = {Bronnenlijst},
-}
 
 \printbibliography[heading=bibintoc]
 

@@ -112,7 +112,7 @@ Dit project ontwikkelt een **AI-gestuurd inbound callcenter** voor tandartsprakt
 - Biber voor bibliografie
 - Geïnstalleerde fonts: Montserrat, Fira Code, Fira Math
 
-### Lokaal bouwen
+### Lokaal bouwen MacOs(.sh) / Windows(.bat)
 
 ```bash
 # Thesis compileren

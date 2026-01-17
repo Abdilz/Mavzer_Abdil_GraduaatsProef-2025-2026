@@ -5,104 +5,50 @@
 \chapter{Conclusie}%
 \label{ch:conclusie}
 
-Dit afsluitende hoofdstuk beantwoordt de onderzoeksvragen, reflecteert op het behaalde resultaat, en geeft aanbevelingen voor toekomstig onderzoek.
-
 \section{Beantwoording onderzoeksvragen}
-
-\subsection{Hoofdvraag}
 
 \textit{Hoe kan een AI-gestuurd callcenter de telefonische dienstverlening van tandartspraktijken automatiseren met behoud van klanttevredenheid?}
 
-Dit onderzoek toont aan dat een AI-gestuurd callcenter de telefonische dienstverlening van tandartspraktijken effectief kan automatiseren. Door de combinatie van Twilio voor telefonie-infrastructuur en OpenAI GPT voor natuurlijke taalverwerking is het mogelijk om een systeem te bouwen dat:
-
+Dit onderzoek toont aan dat de combinatie van Twilio en OpenAI GPT een effectief AI-callcenter mogelijk maakt dat:
 \begin{itemize}
     \item 24/7 beschikbaar is zonder menselijke tussenkomst
-    \item Patiënten in natuurlijke taal te woord staat
-    \item Concrete acties kan uitvoeren zoals afspraken annuleren en verzetten
-    \item Meertalige ondersteuning biedt (Nederlands, Engels, Frans)
+    \item Patiënten in natuurlijke taal te woord staat (NL/EN/FR)
+    \item Afspraken kan opzoeken, annuleren en verzetten
     \item Naadloos integreert met bestaande praktijksoftware
 \end{itemize}
 
-De klanttevredenheid wordt behouden door korte, duidelijke communicatie, het correct uitvoeren van de gevraagde acties, en de mogelijkheid om door te verbinden naar een medewerker wanneer nodig.
-
-\subsection{Deelvragen}
-
-\textbf{1. Welke technologieën zijn het meest geschikt voor spraakgestuurde AI-assistenten?}
-
-Twilio bleek de meest geschikte keuze voor telefonie vanwege de uitgebreide API's, goede documentatie, en flexibele webhook-architectuur. OpenAI GPT onderscheidt zich door superieure taalcapaciteiten en het function calling mechanisme dat gestructureerde acties mogelijk maakt.
-
-\textbf{2. Hoe kan OpenAI's function calling worden ingezet voor afspraakbeheer?}
-
-Door functies te definiëren met duidelijke namen, beschrijvingen en parameters kan het model automatisch bepalen wanneer welke functie moet worden aangeroepen. De backend voert vervolgens de eigenlijke actie uit en communiceert het resultaat terug naar het model voor een natuurlijke response.
-
-\textbf{3. Welke architectuur is nodig voor real-time spraakverwerking?}
-
-Een webhook-gebaseerde architectuur waarbij Twilio HTTP-callbacks stuurt naar de backend bleek effectief. Belangrijke aspecten zijn: strikte timeout-management (14 seconden intern), asynchrone verwerking, en stateless design met externe context-opslag.
-
-\textbf{4. Hoe kan meertalige ondersteuning worden geïmplementeerd?}
-
-Door een IVR-menu voor taalkeuze, dynamische system prompts per taal, taalspecifieke spraakherkenning-configuratie, en geschikte Text-to-Speech stemmen (Amazon Polly) per taal.
-
-\textbf{5. Welke edge cases moeten worden afgehandeld?}
-
-Belangrijke edge cases zijn: onverstaanbare spraak, telefoonnummers in diverse formaten, wisselen van intentie mid-gesprek, meerdere afspraken bij één patiënt, en API-fouten. Deze vereisen uitgebreide foutafhandeling en retry-logica.
+\textbf{Deelvragen:}
+\begin{enumerate}
+    \item \textbf{Technologieën}: Twilio voor telefonie (webhooks, STT/TTS), OpenAI GPT voor function calling
+    \item \textbf{Function calling}: Functies definiëren met JSON Schema; model bepaalt automatisch welke aan te roepen
+    \item \textbf{Architectuur}: Webhook-gebaseerd met 14 sec timeout, stateless design
+    \item \textbf{Meertaligheid}: IVR-menu, dynamische prompts, taalspecifieke TTS-stemmen
+\end{enumerate}
 
 \section{Reflectie}
 
-\subsection{Sterke punten}
-
-Het ontwikkelde systeem heeft verschillende sterke punten:
-
+\textbf{Sterke punten:}
 \begin{itemize}
-    \item \textbf{Schaalbaarheid}: Het systeem kan zonder aanpassingen meerdere gelijktijdige gesprekken afhandelen.
-    \item \textbf{Uitbreidbaarheid}: Nieuwe functies kunnen worden toegevoegd door extra tools te definiëren.
-    \item \textbf{Onderhoudbaarheid}: De gelaagde architectuur maakt het eenvoudig om componenten apart te updaten.
-    \item \textbf{Kostenefficiëntie}: Na de initiële ontwikkeling zijn de operationele kosten beperkt tot API-gebruik.
+    \item Schaalbaarheid en uitbreidbaarheid
+    \item Gelaagde, onderhoudbare architectuur
+    \item Kostenefficiënt na initiële ontwikkeling
 \end{itemize}
 
-\subsection{Verbeterpunten}
-
-Er zijn ook aspecten die beter kunnen:
-
+\textbf{Verbeterpunten:}
 \begin{itemize}
-    \item \textbf{Latency}: De huidige 2-4 seconden kan worden verbeterd door overstap naar WebSockets.
-    \item \textbf{Complexe scenario's}: Het systeem worstelt met gecombineerde of onduidelijke vragen.
-    \item \textbf{Monitoring}: Meer uitgebreide monitoring en alerting zou helpen bij proactief onderhoud.
+    \item Latency verlagen via WebSockets
+    \item Complexere scenario's beter afhandelen
 \end{itemize}
 
-\section{Aanbevelingen voor toekomstig onderzoek}
-
-Op basis van dit onderzoek worden de volgende richtingen voor toekomstig werk aanbevolen:
-
-\subsection{Technische uitbreidingen}
+\section{Toekomstig werk}
 
 \begin{itemize}
-    \item \textbf{WebSockets}: Migratie van webhooks naar WebSockets voor lagere latency en real-time streaming van audio.
-    \item \textbf{Outbound calling}: Implementatie van proactieve afspraakherinneringen via uitgaande oproepen.
-    \item \textbf{RAG-integratie}: Retrieval-Augmented Generation voor het beantwoorden van praktijkspecifieke vragen op basis van documentatie.
-    \item \textbf{Voice cloning}: Custom stemmen die passen bij de identiteit van de praktijk.
-\end{itemize}
-
-\subsection{Functionele uitbreidingen}
-
-\begin{itemize}
-    \item \textbf{Meer zorgsectoren}: Uitbreiding naar huisartsen, kinesisten, en andere zorgverleners.
-    \item \textbf{Intake-gesprekken}: Automatiseren van nieuwe patiënt intakes.
-    \item \textbf{Noodgevallen-detectie}: Herkenning van urgente situaties en directe doorschakeling.
-\end{itemize}
-
-\subsection{Onderzoeksrichtingen}
-
-\begin{itemize}
-    \item \textbf{Gebruikerstevredenheid}: Kwantitatief onderzoek naar de tevredenheid van patiënten met AI-telefonie.
-    \item \textbf{Kostenbatenanalyse}: Vergelijking van operationele kosten versus traditionele receptie.
-    \item \textbf{Privacy-aspecten}: Diepgaand onderzoek naar GDPR-compliance en patiëntperceptie van data-gebruik.
+    \item \textbf{WebSockets}: Lagere latency, real-time audio streaming
+    \item \textbf{Outbound calling}: Proactieve afspraakherinneringen
+    \item \textbf{RAG-integratie}: Praktijkspecifieke vragen beantwoorden
+    \item \textbf{Uitbreiding}: Andere zorgsectoren (huisartsen, kinesisten)
 \end{itemize}
 
 \section{Slotwoord}
 
-Dit project demonstreert dat de combinatie van moderne AI-technologie en cloud-telefonie een krachtig instrument is voor het automatiseren van klantenservice in de zorgsector. De technologie is rijp voor productie-implementatie, met de kanttekening dat menselijke backup voor complexe situaties essentieel blijft.
-
-De opgedane kennis en ervaring op het gebied van webhooks, AI-integratie, real-time systemen, en cloud deployment vormen een waardevolle basis voor verdere professionele ontwikkeling. Dit project bewijst dat met de juiste technologiekeuzes en een iteratieve aanpak, zelfs complexe AI-toepassingen binnen het bereik liggen van een graduaatsstudent.
-
-De toekomst van klantenservice in de zorg ligt in de combinatie van AI-efficiëntie en menselijke empathie. Dit project levert daar een concrete bijdrage aan.
+Dit project demonstreert dat moderne AI-technologie en cloud-telefonie klantenservice in de zorgsector effectief kunnen automatiseren. De opgedane kennis op het gebied van webhooks, AI-integratie en cloud deployment vormt een waardevolle basis voor verdere professionele ontwikkeling.

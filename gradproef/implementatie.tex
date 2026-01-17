@@ -13,7 +13,7 @@ Het systeem bestaat uit verschillende lagen die samenwerken om een naadloze gebr
 
 \begin{figure}[h]
 \centering
-\fbox{\parbox{0.8\textwidth}{
+\fbox{\parbox{0.9\textwidth}{
 \centering
 \textbf{Gespreksflow}\\[1em]
 Patiënt belt $\rightarrow$ Twilio $\rightarrow$ ASP.NET Core API $\rightarrow$ OpenAI GPT\\[0.5em]
@@ -28,43 +28,24 @@ TwiML Response $\rightarrow$ Twilio $\rightarrow$ Patiënt hoort antwoord
 
 \section{Twilio Controller}
 
-De \texttt{TwilioController} is het ingangspunt voor alle Twilio webhooks. De belangrijkste endpoints zijn:
+De \texttt{TwilioController} is het ingangspunt voor alle Twilio webhooks~\autocite{TwilioWebhooks2024}. De belangrijkste endpoints zijn:
 
 \begin{listing}
-\begin{minted}{csharp}
-[ApiController]
-[Route("api/[controller]")]
-public class TwilioController : ControllerBase
+\begin{minted}[fontsize=\small]{csharp}
+[HttpPost("incoming-call")]
+public async Task<IActionResult> IncomingCall()
 {
-    [HttpPost("incoming-call")]
-    public async Task<IActionResult> IncomingCall()
-    {
-        // Genereer IVR menu voor taalkeuze
-        var response = new VoiceResponse();
-        response.Say("Press 1 for English. Druk 2 voor Nederlands. " +
-                     "Appuyez sur 3 pour le français.",
-                     voice: "Polly.Joanna");
-        response.Gather(
-            numDigits: 1,
-            action: new Uri("/api/twilio/language-selected", UriKind.Relative)
-        );
-        return Content(response.ToString(), "application/xml");
-    }
-
-    [HttpPost("process-speech/{conversationId}")]
-    public async Task<IActionResult> ProcessSpeech(
-        string conversationId,
-        [FromForm] string SpeechResult)
-    {
-        // Verwerk spraak via OpenAI en genereer antwoord
-        var aiResponse = await _openAiService
-            .ProcessUserInput(conversationId, SpeechResult);
-        return GenerateTwimlResponse(aiResponse);
-    }
+    var response = new VoiceResponse();
+    response.Say("Press 1 for English. Druk 2 voor Nederlands.");
+    response.Gather(numDigits: 1,
+        action: new Uri("/api/twilio/language-selected", UriKind.Relative));
+    return Content(response.ToString(), "application/xml");
 }
 \end{minted}
-\caption[TwilioController]{De TwilioController met incoming call en speech processing endpoints}
+\caption[TwilioController]{Incoming call endpoint van de TwilioController}
 \end{listing}
+
+De \texttt{IncomingCall} methode wordt aangeroepen wanneer een patiënt belt. Er wordt een IVR-menu gegenereerd met \texttt{<Gather>} dat wacht op een toetsinvoer voor taalkeuze.
 
 \section{OpenAI Integratie}
 
@@ -75,265 +56,151 @@ De communicatie met OpenAI verloopt via de \texttt{OpenAIChatService}. Deze serv
 De system prompt is cruciaal voor het gedrag van de AI-assistent. Een vereenvoudigd voorbeeld:
 
 \begin{listing}
-\begin{minted}{csharp}
-public static string GetSystemMessage(string locale)
+\begin{minted}[fontsize=\small]{csharp}
+var languageInstruction = locale switch
 {
-    var languageInstruction = locale switch
-    {
-        "nl-be" => "You MUST speak ONLY in Dutch.",
-        "fr-fr" => "You MUST speak ONLY in French.",
-        _ => "You MUST speak ONLY in English."
-    };
-
-    return $@"{languageInstruction}
-
-You are a friendly AI assistant for a dental practice call center.
-
-PRIMARY GOAL: Help patients view/cancel appointments or request new ones.
-
-TOOLS:
-- lookup_customer(phoneNumber): Get patient info
-- cancel_appointment(reservationId): Cancel appointment
-- reschedule_appointment(date, time): Reschedule
-- add_to_waitlist(reason, days): Add to waitlist
-- transfer_to_practice(): Transfer call
-
-BEHAVIOR: Short sentences. One question at a time. Never invent data.";
-}
+    "nl-be" => "You MUST speak ONLY in Dutch.",
+    "fr-fr" => "You MUST speak ONLY in French.",
+    _ => "You MUST speak ONLY in English."
+};
 \end{minted}
-\caption[System Prompt]{Vereenvoudigde versie van de system prompt}
+\caption[System Prompt]{Taalselectie in de system prompt}
 \end{listing}
+
+De system prompt bevat strikte taalinstructies om te voorkomen dat de AI van taal wisselt. Daarnaast worden de beschikbare tools en gedragsregels (korte zinnen, één vraag tegelijk) meegegeven.
 
 \subsection{Function Calling}
 
-De AI-tools worden gedefinieerd als JSON Schema's die aan OpenAI worden meegegeven:
+De AI-tools worden gedefinieerd als JSON Schema's die aan OpenAI worden meegegeven~\autocite{OpenAI2024}:
 
 \begin{listing}
-\begin{minted}{csharp}
-private static readonly FunctionDefinition LookupCustomerFunction = new()
-{
+\begin{minted}[fontsize=\small]{csharp}
+new FunctionDefinition {
     Name = "lookup_customer",
-    Description = "Look up customer information by phone number",
-    Parameters = BinaryData.FromObjectAsJson(new
-    {
+    Description = "Look up customer by phone number",
+    Parameters = BinaryData.FromObjectAsJson(new {
         type = "object",
-        properties = new
-        {
-            phoneNumber = new
-            {
-                type = "string",
-                description = "The phone number to look up"
-            }
-        },
+        properties = new { phoneNumber = new { type = "string" } },
         required = new[] { "phoneNumber" }
     })
 };
 \end{minted}
-\caption[Function Definition]{Definitie van de lookup\_customer functie voor OpenAI}
+\caption[Function Definition]{Definitie van een OpenAI function}
 \end{listing}
+
+Functies worden gedefinieerd in JSON Schema formaat. OpenAI herkent automatisch wanneer een functie moet worden aangeroepen op basis van de gebruikersinput. Het systeem beschikt over vijf kerntools:
+\begin{itemize}
+    \item \texttt{lookup\_customer}: Patiëntgegevens en afspraken opzoeken
+    \item \texttt{cancel\_appointment}: Afspraak annuleren na bevestiging
+    \item \texttt{reschedule\_appointment}: Afspraak verzetten naar nieuw tijdstip
+    \item \texttt{add\_to\_waitlist}: Patiënt toevoegen aan wachtlijst
+    \item \texttt{transfer\_to\_practice}: Doorverbinden naar praktijk
+\end{itemize}
 
 \section{Tool Handlers}
 
 Elke AI-tool heeft een bijbehorende handler die de business logic implementeert. Hieronder een voorbeeld van de \texttt{CancelAppointmentTool}:
 
 \begin{listing}
-\begin{minted}{csharp}
-public class CancelAppointmentTool : ITool
+\begin{minted}[fontsize=\small]{csharp}
+public async Task<string> ExecuteAsync(CallContext context, JsonElement args)
 {
-    private readonly ITurnUpApiService _apiService;
-
-    public async Task<string> ExecuteAsync(
-        CallContext context,
-        JsonElement arguments)
-    {
-        // Haal de geselecteerde afspraak op
-        var appointment = context.GetSelectedAppointment();
-        if (appointment == null)
-            return "ERROR: No appointment selected";
-
-        // Annuleer via TurnUp API
-        var result = await _apiService.CancelReservationAsync(
-            appointment.ReservationId,
-            context.CustomerId
-        );
-
-        if (result.Success)
-        {
-            context.AddAction($"CANCELLED:{appointment.ReservationId}");
-
-            // Check of reschedule mogelijk is
-            if (result.RescheduleData != null)
-            {
-                context.StoreRescheduleData(result.RescheduleData);
-                return "Appointment cancelled. Reschedule data available.";
-            }
-            return "Appointment cancelled successfully.";
-        }
-
-        return $"ERROR: {result.ErrorMessage}";
-    }
+    var appointment = context.GetSelectedAppointment();
+    if (appointment == null) return "ERROR: No appointment selected";
+    
+    var result = await _apiService.CancelReservationAsync(
+        appointment.ReservationId, context.CustomerId);
+    return result.Success ? "Cancelled successfully." : result.ErrorMessage;
 }
 \end{minted}
-\caption[Cancel Appointment Tool]{Implementatie van de afspraak annulering tool}
+\caption[Cancel Appointment Tool]{Execute-methode van de CancelAppointmentTool}
 \end{listing}
+
+Elke tool implementeert de \texttt{ITool} interface. De tool haalt de geselecteerde afspraak uit de context, roept de TurnUp API aan, en retourneert het resultaat aan OpenAI.
 
 \section{Conversatie Context}
 
 De \texttt{CallContext} klasse houdt alle relevante informatie bij gedurende een gesprek:
 
 \begin{listing}
-\begin{minted}{csharp}
+\begin{minted}[fontsize=\small]{csharp}
 public class CallContext
 {
     public string ConversationId { get; set; }
-    public string CallStatus { get; set; }
     public List<ChatMessage> Messages { get; set; } = new();
-    public List<string> Actions { get; set; } = new();
     public string UserLocale { get; set; }
-
-    // Opgeslagen data uit tool calls
     public CustomerInfo? Customer { get; private set; }
     public List<Appointment> Appointments { get; private set; }
-    public Appointment? SelectedAppointment { get; private set; }
-    public string? PracticePhone { get; private set; }
-
-    public void AddAction(string action)
-    {
-        Actions.Add(action);
-    }
-
-    public string GetDynamicContext()
-    {
-        // Genereer context voor de AI gebaseerd op huidige staat
-        var sb = new StringBuilder();
-        sb.AppendLine("=== CURRENT STATE ===");
-
-        if (Customer != null)
-            sb.AppendLine($"Customer: {Customer.Name}");
-        if (Appointments?.Any() == true)
-            sb.AppendLine($"Appointments: {Appointments.Count}");
-
-        return sb.ToString();
-    }
 }
 \end{minted}
-\caption[Call Context]{De CallContext klasse voor het bijhouden van gespreksstaat}
+\caption[Call Context]{De CallContext klasse}
 \end{listing}
+
+De \texttt{CallContext} bewaart alle gespreksinformatie: conversatie-ID, chatgeschiedenis, taalvoorkeur en opgehaalde klantgegevens. Deze context wordt bij elke beurt aan de AI-prompt toegevoegd.
 
 \section{TwiML Response Generatie}
 
-Na verwerking door OpenAI wordt een TwiML response gegenereerd die Twilio instrueert wat te doen:
+Na verwerking door OpenAI wordt een TwiML response gegenereerd die Twilio instrueert wat te doen~\autocite{TwilioTwiML2024}:
 
 \begin{listing}
-\begin{minted}{csharp}
-private IActionResult GenerateTwimlResponse(
-    AiResponse response,
-    CallContext context)
-{
-    var voiceResponse = new VoiceResponse();
-
-    // Selecteer stem op basis van taal
-    var voice = context.UserLocale switch
-    {
-        "nl-be" => "Polly.Ruben",
-        "fr-fr" => "Polly.Mathieu",
-        _ => "Polly.Joanna"
-    };
-
-    // Spreek het AI-antwoord uit
-    voiceResponse.Say(response.Message, voice: voice);
-
-    // Bepaal volgende actie
-    if (response.ShouldEndCall)
-    {
-        voiceResponse.Hangup();
-    }
-    else if (response.ShouldTransfer)
-    {
-        voiceResponse.Dial(context.PracticePhone);
-    }
-    else
-    {
-        // Luister naar volgende input
-        voiceResponse.Gather(
-            input: new[] { Gather.InputEnum.Speech },
-            speechTimeout: "auto",
-            language: GetTwilioLanguage(context.UserLocale),
-            action: new Uri($"/api/twilio/process-speech/{context.ConversationId}",
-                           UriKind.Relative)
-        );
-    }
-
-    return Content(voiceResponse.ToString(), "application/xml");
-}
+\begin{minted}[fontsize=\small]{csharp}
+var voice = context.UserLocale switch {
+    "nl-be" => "Polly.Ruben",
+    "fr-fr" => "Polly.Mathieu",
+    _ => "Polly.Joanna"
+};
+voiceResponse.Say(response.Message, voice: voice);
+voiceResponse.Gather(input: new[] { Gather.InputEnum.Speech },
+    action: new Uri($"/api/twilio/process-speech/{context.ConversationId}"));
 \end{minted}
-\caption[TwiML Response]{Generatie van TwiML response op basis van AI-output}
+\caption[TwiML Response]{Generatie van TwiML response}
 \end{listing}
+
+De TwiML response bevat een \texttt{<Say>} element met de AI-tekst en een \texttt{<Gather>} voor het opvangen van de volgende spraak-input. Per taal wordt een andere Amazon Polly-stem geselecteerd.
 
 \section{Gespreksopname en Transcriptie}
 
-Alle gesprekken worden opgenomen voor kwaliteitscontrole. De opname wordt gestart bij het begin van het gesprek:
+Alle gesprekken worden opgenomen voor kwaliteitscontrole~\autocite{TwilioRecording2024}. De opname wordt gestart bij het begin van het gesprek:
 
 \begin{listing}
-\begin{minted}{csharp}
-// In de incoming call handler
+\begin{minted}[fontsize=\small]{csharp}
 voiceResponse.Record(
-    recordingStatusCallback: new Uri("/api/twilio/recording-callback",
-                                     UriKind.Relative),
-    recordingChannels: "dual",
-    trim: "trim-silence"
-);
+    recordingStatusCallback: new Uri("/api/twilio/recording-callback"),
+    recordingChannels: "dual", trim: "trim-silence");
 \end{minted}
-\caption[Recording]{Configuratie van gespreksopname in TwiML}
+\caption[Recording]{Configuratie van gespreksopname}
 \end{listing}
 
-Na afloop van het gesprek wordt de opname opgeslagen in Azure Blob Storage en wordt een transcriptie aangevraagd via de OpenAI Whisper API.
+De \texttt{<Record>} instructie neemt het gesprek op in dual-channel formaat (patiënt en AI apart). Na afloop wordt via een callback de opname en transcriptie opgeslagen in de SQL database.
 
 \section{Error Handling}
 
 Robuuste foutafhandeling is essentieel voor een betrouwbaar systeem:
 
 \begin{listing}
-\begin{minted}{csharp}
-public async Task<IActionResult> ProcessSpeech(...)
-{
-    try
-    {
-        // Timeout instellen (Twilio max = 15 sec)
-        using var cts = new CancellationTokenSource(
-            TimeSpan.FromSeconds(14));
-
-        var response = await _openAiService
-            .ProcessUserInputAsync(conversationId, speechResult, cts.Token);
-
-        return GenerateTwimlResponse(response);
-    }
-    catch (OperationCanceledException)
-    {
-        // Timeout - vraag gebruiker om te herhalen
-        return GenerateFallbackResponse(
-            "Sorry, ik kon u niet verwerken. Kunt u dat herhalen?");
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error processing speech");
-        return GenerateFallbackResponse(
-            "Er is een fout opgetreden. Probeer het opnieuw.");
-    }
+\begin{minted}[fontsize=\small]{csharp}
+try {
+    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(14));
+    var response = await _openAiService.ProcessUserInputAsync(
+        conversationId, speechResult, cts.Token);
+    return GenerateTwimlResponse(response);
+}
+catch (OperationCanceledException) {
+    return GenerateFallbackResponse("Kunt u dat herhalen?");
 }
 \end{minted}
-\caption[Error Handling]{Foutafhandeling met timeout en fallback responses}
+\caption[Error Handling]{Timeout-afhandeling}
 \end{listing}
+
+Omdat Twilio maximaal 15 seconden wacht op een response, wordt een interne timeout van 14 seconden ingesteld. Bij een timeout krijgt de patiënt een fallback-bericht zodat het gesprek niet wordt afgebroken.
 
 \section{Deployment}
 
-Het systeem wordt gedeployed op Azure met de volgende configuratie:
-
+Het systeem wordt gehost op Azure:
 \begin{itemize}
-    \item \textbf{Azure App Service}: Hosting van de ASP.NET Core applicatie
-    \item \textbf{Azure Key Vault}: Opslag van API keys (Twilio, OpenAI)
-    \item \textbf{Azure Blob Storage}: Opslag van gespreksopnames
-    \item \textbf{Azure Monitor}: Logging en alerting
+    \item \textbf{Azure App Service}: Hosting ASP.NET Core applicatie
+    \item \textbf{Azure Key Vault}: API keys (Twilio, OpenAI)~\autocite{AzureKeyVault2024}
+    \item \textbf{SQL Database}: Opslag van gespreksopnames en transcripties
 \end{itemize}
 
-De deployment wordt geautomatiseerd via GitHub Actions, waarbij elke push naar de main branch automatisch wordt gedeployed naar de productieomgeving.
+Deployment via GitHub Actions~\autocite{GitHubActions2024} naar productie bij elke push naar main.

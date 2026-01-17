@@ -5,84 +5,40 @@
 \chapter{\IfLanguageName{dutch}{Inleiding}{Introduction}}%
 \label{ch:inleiding}
 
-De zorgsector staat voor een toenemende digitalisering, waarbij kunstmatige intelligentie (AI) een steeds prominentere rol speelt. Tandartspraktijken vormen hierop geen uitzondering: zij ontvangen dagelijks tientallen telefoontjes van patiënten die informatie willen over hun afspraken, een afspraak willen annuleren of verzetten, of simpelweg doorverbonden willen worden met de praktijk. Deze repetitieve taken leggen een aanzienlijke druk op het administratief personeel en beperken de bereikbaarheid tot kantooruren.
+Tandartspraktijken ontvangen dagelijks tientallen telefoontjes van patiënten voor afspraakgerelateerde vragen. Deze repetitieve taken leggen druk op het administratief personeel en beperken de bereikbaarheid tot kantooruren. TurnUp, een Belgisch softwarebedrijf gespecialiseerd in praktijkbeheersoftware, zag een opportuniteit om deze uitdaging aan te pakken met AI-technologie.
 
-TurnUp, een Belgisch softwarebedrijf gespecialiseerd in praktijkbeheersoftware voor tandartsen, zag een opportuniteit om deze uitdaging aan te pakken met moderne AI-technologieën. Dit project onderzoekt de haalbaarheid en implementatie van een AI-gestuurd inbound callcenter dat volledig geautomatiseerd patiëntoproepen kan afhandelen.
-
-\section{\IfLanguageName{dutch}{Probleemstelling}{Problem Statement}}%
+\section{Probleemstelling}%
 \label{sec:probleemstelling}
 
-Tandartspraktijken worden geconfronteerd met verschillende uitdagingen op het gebied van telefonische bereikbaarheid:
-
+Tandartspraktijken worden geconfronteerd met:
 \begin{itemize}
-    \item \textbf{Beperkte bereikbaarheid}: Patiënten kunnen enkel tijdens kantooruren telefonisch terecht, terwijl veel mensen net dan aan het werk zijn.
-    \item \textbf{Wachttijden}: Tijdens piekmomenten (bijvoorbeeld maandagochtend) ontstaan er wachtrijen, wat leidt tot frustratie bij patiënten.
-    \item \textbf{Repetitieve taken}: Receptionisten besteden een groot deel van hun tijd aan standaardvragen die eenvoudig geautomatiseerd kunnen worden.
-    \item \textbf{Meertaligheid}: In België is meertalige ondersteuning (Nederlands, Frans, Engels) vaak een vereiste, wat extra complexiteit toevoegt.
-    \item \textbf{Kosten}: Het aannemen van extra personeel voor telefonische ondersteuning is kostbaar en niet altijd rendabel.
+    \item \textbf{Beperkte bereikbaarheid}: Enkel tijdens kantooruren
+    \item \textbf{Wachttijden}: Piekmomenten leiden tot frustratie
+    \item \textbf{Repetitieve taken}: Standaardvragen die geautomatiseerd kunnen worden
+    \item \textbf{Meertaligheid}: NL/FR/EN ondersteuning vereist
 \end{itemize}
 
-De doelgroep van dit onderzoek bestaat uit tandartspraktijken die gebruik maken van de TurnUp praktijkbeheersoftware en die hun telefonische bereikbaarheid willen verbeteren zonder extra personeel aan te werven. Concreet richt dit project zich op de implementatie voor TurnUp zelf, met het oog op een bredere uitrol naar hun klantenbestand.
-
-\section{\IfLanguageName{dutch}{Onderzoeksvraag}{Research question}}%
+\section{Onderzoeksvraag}%
 \label{sec:onderzoeksvraag}
 
-De centrale onderzoeksvraag van deze graduaatsproef luidt:
-
-\begin{quote}
 \textit{Hoe kan een AI-gestuurd callcenter de telefonische dienstverlening van tandartspraktijken automatiseren met behoud van klanttevredenheid?}
-\end{quote}
 
-Deze hoofdvraag wordt opgesplitst in de volgende deelvragen:
-
+Deelvragen:
 \begin{enumerate}
-    \item Welke technologieën zijn het meest geschikt voor spraakgestuurde AI-assistenten in een professionele context?
-    \item Hoe kan OpenAI's function calling mechanisme worden ingezet voor gestructureerde acties zoals afspraakbeheer?
-    \item Welke architectuur is nodig om real-time spraakverwerking te realiseren met acceptabele latency?
-    \item Hoe kan meertalige ondersteuning worden geïmplementeerd zonder de gebruikerservaring te compromitteren?
-    \item Welke edge cases en foutscenario's moeten worden afgehandeld voor een robuust systeem?
+    \item Welke technologieën zijn geschikt voor spraakgestuurde AI-assistenten?
+    \item Hoe kan OpenAI's function calling worden ingezet voor afspraakbeheer?
+    \item Welke architectuur is nodig voor real-time spraakverwerking?
+    \item Hoe kan meertalige ondersteuning worden geïmplementeerd?
 \end{enumerate}
 
-\section{\IfLanguageName{dutch}{Onderzoeksdoelstelling}{Research objective}}%
+\section{Onderzoeksdoelstelling}%
 \label{sec:onderzoeksdoelstelling}
 
-Het beoogde resultaat van deze graduaatsproef is een werkend prototype van een AI-gestuurd inbound callcenter dat:
-
+Het beoogde resultaat is een werkend prototype dat:
 \begin{itemize}
-    \item Inkomende telefoontjes automatisch kan beantwoorden via Twilio
+    \item Inkomende telefoontjes automatisch beantwoordt via Twilio
     \item Patiënten in natuurlijke taal te woord staat via OpenAI GPT
     \item Ondersteuning biedt voor Nederlands, Engels en Frans
-    \item De volgende acties kan uitvoeren:
-    \begin{itemize}
-        \item Klantgegevens en afspraken opzoeken
-        \item Afspraken annuleren na expliciete bevestiging
-        \item Afspraken verzetten naar een nieuw tijdstip
-        \item Patiënten toevoegen aan de wachtlijst voor nieuwe afspraken
-        \item Doorverbinden naar de praktijk indien gewenst
-    \end{itemize}
-    \item Integreert met de bestaande TurnUp API
-    \item Gesprekken opneemt en transcribeert voor kwaliteitscontrole
+    \item Afspraken kan opzoeken, annuleren, verzetten en patiënten aan de wachtlijst kan toevoegen
+    \item Integreert met de TurnUp API
 \end{itemize}
-
-De criteria voor succes zijn:
-\begin{itemize}
-    \item Het systeem kan gesprekken afhandelen zonder menselijke tussenkomst
-    \item De gemiddelde gespreksduur blijft onder de 3 minuten
-    \item Het systeem is 24/7 beschikbaar
-    \item De latency tussen spraakherkenning en AI-respons blijft onder de 2 seconden
-\end{itemize}
-
-\section{\IfLanguageName{dutch}{Opzet van deze graduaatsproef}{Structure of this associate thesis}}%
-\label{sec:opzet-graduaatsproef}
-
-De rest van deze graduaatsproef is als volgt opgebouwd:
-
-In Hoofdstuk~\ref{ch:stand-van-zaken} wordt een overzicht gegeven van de stand van zaken binnen het onderzoeksdomein. Hierbij worden de gebruikte technologieën (Twilio, OpenAI, ASP.NET Core) toegelicht en wordt de context geschetst van AI in klantenservice.
-
-In Hoofdstuk~\ref{ch:methodologie} wordt de methodologie toegelicht en worden de gebruikte onderzoekstechnieken besproken. De ontwikkelaanpak en de verschillende fasen van het project komen hier aan bod.
-
-In Hoofdstuk~\ref{ch:implementatie} wordt de technische implementatie in detail besproken, inclusief de systeemarchitectuur, de integratie van Twilio en OpenAI, en de werking van het function calling mechanisme.
-
-In Hoofdstuk~\ref{ch:resultaten} worden de resultaten gepresenteerd en geanalyseerd. Hierbij wordt gekeken naar de prestaties van het systeem en de opgedane leerpunten.
-
-In Hoofdstuk~\ref{ch:conclusie}, tenslotte, wordt de conclusie gegeven en een antwoord geformuleerd op de onderzoeksvragen. Daarbij wordt ook een aanzet gegeven voor toekomstig onderzoek en mogelijke uitbreidingen.

@@ -11,22 +11,20 @@ Dit hoofdstuk presenteert de resultaten van het ontwikkelde AI-callcenter en bes
 
 Het ontwikkelde systeem voldoet aan alle gestelde functionele eisen:
 
-\subsection{Kernfunctionaliteiten}
-
 \begin{table}[h]
 \centering
 \begin{tabular}{lcc}
 \toprule
 \textbf{Functionaliteit} & \textbf{Geïmplementeerd} & \textbf{Getest} \\
 \midrule
-Klantgegevens opzoeken & \checkmark & \checkmark \\
-Afspraak annuleren & \checkmark & \checkmark \\
-Afspraak verzetten & \checkmark & \checkmark \\
-Toevoegen aan wachtlijst & \checkmark & \checkmark \\
-Doorverbinden naar praktijk & \checkmark & \checkmark \\
-Meertalige ondersteuning (NL/EN/FR) & \checkmark & \checkmark \\
-Gespreksopname & \checkmark & \checkmark \\
-Transcriptie & \checkmark & \checkmark \\
+Klantgegevens opzoeken & Ja & Ja \\
+Afspraak annuleren & Ja & Ja \\
+Afspraak verzetten & Ja & Ja \\
+Toevoegen aan wachtlijst & Ja & Ja \\
+Doorverbinden naar praktijk & Ja & Ja \\
+Meertalige ondersteuning (NL/EN/FR) & Ja & Ja \\
+Gespreksopname & Ja & Ja \\
+Transcriptie & Ja & Ja \\
 \bottomrule
 \end{tabular}
 \caption[Functionele resultaten]{Overzicht van geïmplementeerde en geteste functionaliteiten}
@@ -65,7 +63,7 @@ Tijdens de ontwikkeling werden verschillende technische uitdagingen overwonnen:
 
 \textbf{Probleem}: De AI vergat soms eerder opgezochte informatie wanneer de gebruiker van onderwerp wisselde.
 
-\textbf{Oplossing}: Implementatie van een dynamische context die bij elke beurt aan de prompt wordt toegevoegd, met expliciete instructies over wat al bekend is.
+\textbf{Oplossing}: Implementatie van een dynamische context die bij elke beurt aan de prompt wordt toegevoegd.
 
 \subsubsection{Meertalige prompts}
 
@@ -73,94 +71,51 @@ Tijdens de ontwikkeling werden verschillende technische uitdagingen overwonnen:
 
 \textbf{Oplossing}: Strikte taalinstructies aan het begin van de prompt en dynamische taalspecifieke voorbeeldzinnen.
 
-\subsection{Webhook-architectuur}
-
-De webhook-gebaseerde architectuur bleek effectief maar heeft beperkingen:
-
-\textbf{Voordelen}:
-\begin{itemize}
-    \item Eenvoudig te implementeren en debuggen
-    \item Goede ondersteuning door Twilio
-    \item Stateless backend mogelijk
-\end{itemize}
-
-\textbf{Nadelen}:
-\begin{itemize}
-    \item Elke beurt vereist een aparte HTTP-aanroep
-    \item Latency door network round-trips
-    \item Twilio timeout beperkt complexiteit van verwerking
-\end{itemize}
-
-\textbf{Toekomstige verbetering}: Overgang naar WebSockets zou de latency significant kunnen verlagen en meer complexe real-time interacties mogelijk maken.
-
 \section{Leerpunten}
 
-Dit project heeft geleid tot significante persoonlijke en professionele groei op verschillende vlakken:
+Dit project heeft geleid tot significante persoonlijke en professionele groei:
 
 \subsection{Technische vaardigheden}
 
 \begin{itemize}
     \item \textbf{Webhooks}: Diepgaande ervaring met asynchroon communiceren tussen externe services en de backend. Het begrijpen van callback-patronen en het correct afhandelen van meerdere gelijktijdige requests.
-
-    \item \textbf{AI-integratie}: Praktische ervaring met prompt engineering en OpenAI's function calling mechanisme. Het leren balanceren tussen instructie-detail en flexibiliteit in AI-prompts.
-
-    \item \textbf{Real-time systemen}: Inzicht in de uitdagingen van lage-latency spraakverwerking. Het belang van timeout-management en graceful degradation.
-
-    \item \textbf{Cloud deployment}: Hands-on ervaring met Azure-services, met name Key Vault voor secrets management en Blob Storage voor media-opslag.
+    \item \textbf{AI-integratie}: Praktische ervaring met prompt engineering en OpenAI's function calling mechanisme.
+    \item \textbf{Real-time systemen}: Inzicht in de uitdagingen van lage-latency spraakverwerking en timeout-management.
+    \item \textbf{Cloud deployment}: Hands-on ervaring met Azure-services, met name Key Vault voor secrets management.
 \end{itemize}
 
 \subsection{Professionele vaardigheden}
 
 \begin{itemize}
-    \item \textbf{Zelfstandig werken}: Het project vereiste veel eigen onderzoek en probleemoplossend denken. Documentatie lezen, experimenteren, en itereren waren dagelijkse bezigheden.
-
-    \item \textbf{Communicatie met stakeholders}: Regelmatig overleg met TurnUp over requirements en feedback verwerken in het systeem.
-
-    \item \textbf{Iteratief ontwikkelen}: Het belang van kleine, testbare incrementen in plaats van grote releases.
+    \item \textbf{Zelfstandig werken}: Het project vereiste veel eigen onderzoek en probleemoplossend denken.
+    \item \textbf{Communicatie met stakeholders}: Regelmatig overleg met TurnUp over requirements.
+    \item \textbf{Iteratief ontwikkelen}: Het belang van kleine, testbare incrementen.
 \end{itemize}
 
 \section{Vergelijking met doelstellingen}
 
 \begin{table}[h]
 \centering
-\begin{tabular}{p{6cm}cc}
+\begin{tabular}{p{5cm}cc}
 \toprule
 \textbf{Doelstelling} & \textbf{Doel} & \textbf{Bereikt} \\
 \midrule
-Gesprekken zonder menselijke tussenkomst & Ja & Ja \\
+Zonder menselijke tussenkomst & Ja & Ja \\
 Gemiddelde gespreksduur & < 3 min & < 2 min \\
 24/7 beschikbaarheid & Ja & Ja \\
 Latency vraag-antwoord & < 2 sec & 2-4 sec* \\
 Meertalige ondersteuning & 3 talen & 3 talen \\
 \bottomrule
 \end{tabular}
-\caption[Doelstellingen]{Vergelijking van doelstellingen met bereikte resultaten. *Latency hoger dan doel maar acceptabel voor gebruikers.}
+\caption[Doelstellingen]{Vergelijking doelstellingen. *Acceptabel voor gebruikers.}
 \end{table}
-
-De latency-doelstelling van minder dan 2 seconden werd niet volledig gehaald. De werkelijke latency van 2-4 seconden is voornamelijk te wijten aan de verwerkingstijd van OpenAI. Dit bleek in de praktijk geen probleem voor de gebruikerservaring, aangezien patiënten gewend zijn aan korte wachttijden tijdens telefoongesprekken.
 
 \section{Beperkingen}
 
 Het huidige systeem kent enkele beperkingen:
 
 \begin{itemize}
-    \item \textbf{Complexe vragen}: Vragen die buiten het afspraakdomein vallen kunnen niet worden beantwoord.
-    \item \textbf{Accenten en dialecten}: Sterke accenten kunnen de spraakherkenning bemoeilijken.
-    \item \textbf{Achtergrondlawaai}: In lawaaiige omgevingen daalt de kwaliteit van de spraakherkenning.
-    \item \textbf{Geen proactieve acties}: Het systeem kan momenteel geen uitgaande oproepen doen (bijvoorbeeld herinneringen).
-\end{itemize}
-
-\section{Feedback van stakeholders}
-
-TurnUp heeft positief gereageerd op het ontwikkelde systeem. Specifieke feedback:
-
-\begin{quote}
-``Het systeem handelt de meeste standaard scenario's goed af. De meertalige ondersteuning is een grote meerwaarde voor onze Belgische klanten. We zien potentieel voor uitrol naar meerdere praktijken.''
-\end{quote}
-
-Verbeterpunten die werden aangedragen:
-\begin{itemize}
-    \item Meer edge cases afhandelen (bijvoorbeeld gecombineerde vragen)
-    \item Kortere antwoorden in sommige scenario's
-    \item Betere afhandeling van onduidelijke spraak
+    \item \textbf{Complexe vragen}: Vragen buiten het afspraakdomein kunnen niet worden beantwoord
+    \item \textbf{Accenten}: Sterke accenten kunnen de spraakherkenning bemoeilijken
+    \item \textbf{Achtergrondlawaai}: In lawaaiige omgevingen daalt de kwaliteit
 \end{itemize}

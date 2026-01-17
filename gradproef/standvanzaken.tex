@@ -1,185 +1,93 @@
 \chapter{\IfLanguageName{dutch}{Stand van zaken}{State of the art}}%
 \label{ch:stand-van-zaken}
 
-Dit hoofdstuk biedt een overzicht van de technologieën en concepten die ten grondslag liggen aan dit project. We bespreken achtereenvolgens de evolutie van AI in klantenservice, de werking van de gebruikte platformen (Twilio en OpenAI), en de architecturale overwegingen voor real-time spraakverwerking.
-
-\section{Kunstmatige intelligentie in klantenservice}
-
-De inzet van AI voor klantenservice is de afgelopen jaren exponentieel gegroeid. Waar vroeger eenvoudige Interactive Voice Response (IVR) systemen met vaste menu's de norm waren, maken moderne systemen gebruik van Natural Language Processing (NLP) om natuurlijke gesprekken te voeren~\autocite{OpenAI2023}.
-
-\subsection{Van IVR naar conversationele AI}
-
-Traditionele IVR-systemen werken met vooraf gedefinieerde keuzemenu's: ``Druk 1 voor afspraken, druk 2 voor facturatie.'' Deze aanpak heeft significante beperkingen:
-
-\begin{itemize}
-    \item Gebruikers moeten door lange menu's navigeren
-    \item Complexe vragen kunnen niet worden afgehandeld
-    \item De gebruikerservaring is vaak frustrerend
-\end{itemize}
-
-Conversationele AI-systemen daarentegen begrijpen natuurlijke taal en kunnen contextbewust reageren. Large Language Models (LLMs) zoals GPT-4 hebben deze transitie mogelijk gemaakt door hun vermogen om menselijke taal te begrijpen en te genereren~\autocite{OpenAI2024}.
-
-\subsection{Function calling: de brug tussen taal en actie}
-
-Een cruciale ontwikkeling voor dit project is OpenAI's function calling mechanisme. Dit stelt het taalmodel in staat om niet alleen tekst te genereren, maar ook gestructureerde acties uit te voeren. Het model kan herkennen wanneer een gebruiker een specifieke actie wil (bijvoorbeeld een afspraak annuleren) en de juiste functie aanroepen met de correcte parameters~\autocite{OpenAI2024}.
+Dit hoofdstuk biedt een overzicht van de technologieën die ten grondslag liggen aan dit project. Elke technologie wordt besproken in termen van functionaliteit en relevantie voor het AI-callcenter.
 
 \section{Twilio: programmeerbare telefonie}
 
-Twilio is een cloud communications platform dat API's aanbiedt voor spraak, SMS, en andere communicatiekanalen. Voor dit project zijn de volgende Twilio-componenten relevant~\autocite{Twilio2024}:
+Twilio is een cloud communications platform dat API's aanbiedt voor spraak, SMS en andere communicatiekanalen~\autocite{Twilio2024}. Het platform maakt het mogelijk om telefoongesprekken volledig programmatisch te beheren, wat essentieel is voor de automatisering van een callcenter.
 
 \subsection{Programmable Voice}
 
-Twilio's Programmable Voice API maakt het mogelijk om:
-
+De Programmable Voice API stelt ontwikkelaars in staat om:
 \begin{itemize}
-    \item Inkomende oproepen te ontvangen op een virtueel telefoonnummer
-    \item Oproepen te beantwoorden met vooraf opgenomen of dynamisch gegenereerde audio
-    \item Spraakherkenning (Speech-to-Text) uit te voeren
-    \item Text-to-Speech te gebruiken voor gesproken antwoorden
-    \item Oproepen door te verbinden naar andere nummers
+    \item Inkomende oproepen te ontvangen en te routeren
+    \item Uitgaande oproepen te initiëren
+    \item Spraakherkenning (Speech-to-Text) toe te passen voor het transcriberen van gesproken input
+    \item Text-to-Speech te gebruiken voor het genereren van gesproken antwoorden
+    \item Gesprekken op te nemen voor kwaliteitscontrole en logging
 \end{itemize}
 
-\subsection{TwiML: Twilio Markup Language}
+\subsection{TwiML}
 
-De communicatie met Twilio verloopt via TwiML, een XML-gebaseerde markup language. Een typisch TwiML-antwoord ziet er als volgt uit:
-
-\begin{listing}
-\begin{minted}{xml}
-<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-    <Say voice="Polly.Ruben" language="nl-NL">
-        Welkom bij de tandartspraktijk. Waarmee kan ik u helpen?
-    </Say>
-    <Gather input="speech"
-           speechTimeout="auto"
-           language="nl-NL"
-           action="/api/twilio/process-speech">
-    </Gather>
-</Response>
-\end{minted}
-\caption[TwiML voorbeeld]{Voorbeeld van een TwiML-response met spraakherkenning}
-\end{listing}
-
-\subsection{Webhooks en real-time verwerking}
-
-Twilio communiceert met de backend via webhooks. Bij elke fase van het gesprek (nieuwe oproep, spraakherkenning voltooid, oproep beëindigd) stuurt Twilio een HTTP POST request naar de geconfigureerde endpoint. Dit vereist dat de backend snel kan reageren—Twilio hanteert een timeout van 15 seconden~\autocite{Twilio2024}.
-
-\section{OpenAI en Large Language Models}
-
-OpenAI's GPT-modellen vormen het hart van de AI-assistent. Deze modellen zijn getraind op grote hoeveelheden tekstdata en kunnen menselijke taal begrijpen en genereren.
-
-\subsection{Het GPT-model}
-
-GPT (Generative Pre-trained Transformer) is een type neuraal netwerk dat geoptimaliseerd is voor taaltaken. Het model werkt door te voorspellen wat het volgende woord in een zin zou moeten zijn, gegeven de voorgaande context. Door miljarden parameters en enorme trainingsdata kan het model:
+TwiML (Twilio Markup Language)~\autocite{TwilioTwiML2024} is een XML-gebaseerde taal waarmee instructies aan Twilio worden gegeven. De belangrijkste TwiML-verbs voor dit project zijn:
 
 \begin{itemize}
-    \item Natuurlijke conversaties voeren
-    \item Context over meerdere berichten onthouden
-    \item Intenties herkennen uit ongestructureerde input
-    \item Meertalige ondersteuning bieden
+    \item \textbf{<Say>}: Spreekt tekst uit met Text-to-Speech
+    \item \textbf{<Gather>}: Verzamelt spraak- of toetsinvoer van de beller~\autocite{TwilioGather2024}
+    \item \textbf{<Record>}: Neemt het gesprek op~\autocite{TwilioRecording2024}
+    \item \textbf{<Dial>}: Verbindt door naar een ander telefoonnummer
+    \item \textbf{<Hangup>}: Beëindigt het gesprek
 \end{itemize}
 
-\subsection{Function calling in detail}
+\subsection{Webhooks}
 
-Het function calling mechanisme werkt als volgt~\autocite{OpenAI2024}:
+Twilio werkt met webhooks~\autocite{TwilioWebhooks2024}: HTTP callbacks die bij elke fase van het gesprek worden aangeroepen. Belangrijk is de strikte timeout van 15 seconden --- als de server niet binnen deze tijd reageert, verbreekt Twilio de verbinding. Dit vereist zorgvuldig ontwerp van de backend-architectuur.
+
+\section{OpenAI en Function Calling}
+
+OpenAI's GPT-modellen vormen het hart van de AI-assistent~\autocite{OpenAI2024}. Deze Large Language Models (LLM's) zijn getraind op grote hoeveelheden tekst en kunnen menselijke taal begrijpen en genereren.
+
+\subsection{GPT-4o}
+
+Voor dit project wordt het GPT-4o model gebruikt, dat geoptimaliseerd is voor:
+\begin{itemize}
+    \item Snelle responstijden (essentieel voor real-time conversatie)
+    \item Meertalige ondersteuning
+    \item Instructie-volgen (het model houdt zich aan de gegeven richtlijnen)
+\end{itemize}
+
+\subsection{Function Calling}
+
+Het function calling mechanisme is cruciaal voor de integratie van AI met backend-systemen. Het stelt het model in staat om niet alleen tekst te genereren, maar ook gestructureerde acties uit te voeren:
 
 \begin{enumerate}
-    \item De ontwikkelaar definieert beschikbare functies met hun parameters in JSON Schema formaat
-    \item Het model ontvangt de gebruikersinput samen met de functiedefinities
-    \item Het model bepaalt of een functie moet worden aangeroepen en met welke argumenten
-    \item De backend voert de functie uit en geeft het resultaat terug aan het model
-    \item Het model formuleert een natuurlijk antwoord voor de gebruiker
+    \item \textbf{Definitie}: Functies worden gedefinieerd met parameters in JSON Schema formaat
+    \item \textbf{Herkenning}: Het model analyseert de gebruikersinput en bepaalt of een functie nodig is
+    \item \textbf{Aanroep}: De backend ontvangt een gestructureerd verzoek met functienaam en parameters
+    \item \textbf{Uitvoering}: De backend voert de actie uit (bijv. database-query)
+    \item \textbf{Respons}: Het resultaat wordt teruggegeven aan het model
+    \item \textbf{Formulering}: Het model formuleert een natuurlijk antwoord voor de gebruiker
 \end{enumerate}
 
-Een voorbeeld van een functiedefinitie:
-
-\begin{listing}
-\begin{minted}{json}
-{
-    "name": "cancel_appointment",
-    "description": "Annuleert de geselecteerde afspraak",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "reservationId": {
-                "type": "string",
-                "description": "Het unieke ID van de afspraak"
-            }
-        },
-        "required": ["reservationId"]
-    }
-}
-\end{minted}
-\caption[Function calling definitie]{Voorbeeld van een function calling definitie voor afspraakannulering}
-\end{listing}
+Dit mechanisme maakt het mogelijk om de AI-assistent te verbinden met bestaande bedrijfssystemen zonder dat het model directe toegang tot databases nodig heeft.
 
 \section{ASP.NET Core en Azure}
 
-De backend van het systeem is gebouwd met ASP.NET Core, Microsoft's cross-platform framework voor webapplicaties. De keuze voor dit framework is gebaseerd op:
+De backend is gebouwd met ASP.NET Core~\autocite{CSharpDocs2024}, het cross-platform webframework van Microsoft. Deze keuze is gemaakt vanwege de integratie met de bestaande TurnUp-infrastructuur, die volledig op .NET is gebouwd.
+
+\subsection{Azure Services}
+
+De applicatie maakt gebruik van verschillende Azure-services~\autocite{AzureKeyVault2024}:
 
 \begin{itemize}
-    \item Integratie met de bestaande TurnUp-infrastructuur (ook .NET-gebaseerd)
-    \item Uitstekende ondersteuning voor asynchrone verwerking
-    \item Native Azure-integratie
-    \item Hoge performance voor real-time toepassingen
+    \item \textbf{Azure App Service}: Hosting van de webapplicatie met automatische schaling en hoge beschikbaarheid
+    \item \textbf{Azure Key Vault}: Veilige opslag van gevoelige gegevens zoals API-sleutels voor Twilio en OpenAI
+    \item \textbf{Azure SQL Database}: Opslag van gespreksopnames en transcripties
 \end{itemize}
 
-\subsection{Azure-services}
+\subsection{Deployment}
 
-Het systeem maakt gebruik van verschillende Azure-services~\autocite{Microsoft2024}:
+Voor continuous deployment wordt GitHub Actions~\autocite{GitHubActions2024} gebruikt, waarmee elke push naar de main branch automatisch wordt gedeployed naar Azure.
 
-\begin{itemize}
-    \item \textbf{Azure App Service}: Hosting van de webapplicatie
-    \item \textbf{Azure Key Vault}: Veilige opslag van API-sleutels en secrets
-    \item \textbf{Azure Blob Storage}: Opslag van gespreksopnames
-    \item \textbf{Azure Monitor}: Logging en monitoring van het systeem
-\end{itemize}
+\section{Ontwikkelomgeving}
 
-\section{Vergelijkbare systemen}
+\subsection{ngrok voor lokale ontwikkeling}
 
-Er bestaan reeds verschillende commerciële oplossingen voor AI-gestuurde telefonie:
+Twilio webhooks vereisen een publiek bereikbaar endpoint. Tijdens lokale ontwikkeling wordt ngrok~\autocite{Ngrok2024} gebruikt om een beveiligde tunnel te creëren van een publieke URL naar de lokale ontwikkelserver. Dit maakt het mogelijk om:
 
 \begin{itemize}
-    \item \textbf{Google Dialogflow}: Biedt conversationele AI maar vereist aparte telefonie-integratie
-    \item \textbf{Amazon Connect}: Volledige callcenter-oplossing maar complexer en duurder
-    \item \textbf{Twilio Flex}: Contact center platform maar vereist meer configuratie
-\end{itemize}
-
-Het voordeel van een custom oplossing met Twilio en OpenAI is de volledige controle over de gebruikerservaring en de mogelijkheid tot diepe integratie met bestaande systemen zoals de TurnUp API.
-
-\section{Uitdagingen en overwegingen}
-
-Bij het bouwen van een AI-gestuurd callcenter moeten verschillende uitdagingen worden aangepakt:
-
-\subsection{Latency}
-
-De totale tijd tussen het moment dat een gebruiker spreekt en het moment dat het antwoord wordt afgespeeld bestaat uit:
-
-\begin{enumerate}
-    \item Spraakherkenning (Speech-to-Text): 0.5--2 seconden
-    \item API-aanroep naar OpenAI: 1--3 seconden
-    \item Text-to-Speech generatie: 0.3--1 seconde
-\end{enumerate}
-
-Om binnen Twilio's 15-seconden timeout te blijven, is optimalisatie cruciaal. Het gebruik van streaming responses en caching van veelvoorkomende antwoorden kan helpen.
-
-\subsection{Foutafhandeling}
-
-Een robuust systeem moet omgaan met:
-
-\begin{itemize}
-    \item Onverstaanbare spraak (achtergrondlawaai, accenten)
-    \item Onverwachte gebruikersintentie
-    \item API-fouten van Twilio of OpenAI
-    \item Netwerkproblemen
-\end{itemize}
-
-\subsection{Privacy en veiligheid}
-
-Telefoongesprekken bevatten persoonlijke gegevens en vallen onder de GDPR. Het systeem moet:
-
-\begin{itemize}
-    \item Gebruikers informeren over opname
-    \item Data veilig opslaan en verwerken
-    \item Toegang tot gegevens beperken tot geautoriseerde partijen
+    \item Webhooks te ontvangen zonder te deployen
+    \item Snel te itereren en te debuggen
+    \item Real-time logs te bekijken van inkomende requests
 \end{itemize}

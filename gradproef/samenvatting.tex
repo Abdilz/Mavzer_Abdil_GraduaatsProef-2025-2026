@@ -2,47 +2,40 @@
 %% Samenvatting
 %%=============================================================================
 
-% TODO: De "abstract" of samenvatting is een kernachtige (~ 1 blz. voor een
-% thesis) synthese van het document.
-%
-% Een goede abstract biedt een kernachtig antwoord op volgende vragen:
-%
-% 1. Waarover gaat de graduaatsproef?
-% 2. Waarom heb je er over geschreven?
-% 3. Hoe heb je het onderzoek uitgevoerd?
-% 4. Wat waren de resultaten? Wat blijkt uit je onderzoek?
-% 5. Wat betekenen je resultaten? Wat is de relevantie voor het werkveld?
-%
-% Daarom bestaat een abstract uit volgende componenten:
-%
-% - inleiding + kaderen thema
-% - probleemstelling
-% - (centrale) onderzoeksvraag
-% - onderzoeksdoelstelling
-% - methodologie
-% - resultaten (beperk tot de belangrijkste, relevant voor de onderzoeksvraag)
-% - conclusies, aanbevelingen, beperkingen
-%
-% LET OP! Een samenvatting is GEEN voorwoord!
-
 %%---------- Nederlandse samenvatting -----------------------------------------
-%
-% TODO: Als je je graduaatsproef in het Engels schrijft, moet je eerst een
-% Nederlandse samenvatting invoegen. Haal daarvoor onderstaande code uit
-% commentaar.
-% Wie zijn/haar graduaatsproef in het Nederlands schrijft, kan dit negeren, de inhoud
-% wordt niet in het document ingevoegd.
-
-\IfLanguageName{english}{%
-\selectlanguage{dutch}
-\chapter*{Samenvatting}
-\lipsum[1-4]
-\selectlanguage{english}
-}{}
-
-%%---------- Samenvatting -----------------------------------------------------
-% De samenvatting in de hoofdtaal van het document
 
 \chapter*{\IfLanguageName{dutch}{Samenvatting}{Abstract}}
 
-\lipsum[1-4]
+Tandartspraktijken besteden dagelijks aanzienlijke tijd aan het telefonisch afhandelen van afspraakgerelateerde vragen. Receptionisten worden overspoeld met repetitieve telefoontjes voor het bekijken, annuleren of verzetten van afspraken, terwijl patiënten vaak moeten wachten of buiten kantooruren niet terecht kunnen. Dit onderzoek richt zich op de vraag: \textit{Hoe kan een AI-gestuurd callcenter de telefonische dienstverlening van tandartspraktijken automatiseren met behoud van klanttevredenheid?}
+
+Voor dit project werd een volledig geautomatiseerd inbound callcenter ontwikkeld dat gebruik maakt van \textbf{Twilio} voor de telefonie-infrastructuur en \textbf{OpenAI GPT} voor natuurlijke taalverwerking. Het systeem is gebouwd met ASP.NET Core en gehost op Microsoft Azure. De architectuur maakt gebruik van webhooks voor real-time communicatie tussen Twilio en de backend, waarbij spraakherkenning (Speech-to-Text) en spraaksynthese (Text-to-Speech) naadloos zijn geïntegreerd.
+
+Het systeem biedt ondersteuning voor drie talen (Nederlands, Engels en Frans) en beschikt over vijf kernfunctionaliteiten via OpenAI's function calling mechanisme: klantgegevens opzoeken, afspraken annuleren, afspraken verzetten, patiënten toevoegen aan de wachtlijst, en doorverbinden naar de praktijk. De AI-assistent herkent de intentie van de beller en roept automatisch de juiste functie aan via de TurnUp API.
+
+De resultaten tonen aan dat het systeem 24/7 beschikbaar is zonder menselijke tussenkomst, met een gemiddelde gespreksduur van minder dan twee minuten. Alle gesprekken worden opgenomen en getranscribeerd voor kwaliteitscontrole. Het systeem integreert naadloos met de bestaande praktijksoftware van TurnUp.
+
+Dit onderzoek concludeert dat conversationele AI effectief kan worden ingezet voor klantenservice in de zorgsector. De combinatie van Twilio en OpenAI biedt een schaalbare, meertalige en kostenefficiënte oplossing die zowel patiënten als praktijkmedewerkers ontlast. Toekomstige uitbreidingen omvatten de overstap naar WebSockets voor snellere real-time communicatie, outbound calling voor afspraakherinneringen, en RAG-integratie voor het beantwoorden van praktijkspecifieke vragen.
+
+\bigskip
+
+\textbf{GitHub repository:} \url{https://github.com/Abdilz/Mavzer_Abdil_GraduaatsProef-2025-2026.git}
+
+\newpage
+
+%%---------- Engelse samenvatting (Summary) -----------------------------------
+
+\chapter*{Summary}
+
+Dental practices spend considerable time daily handling appointment-related phone calls. Receptionists are overwhelmed with repetitive calls for viewing, cancelling, or rescheduling appointments, while patients often have to wait or cannot reach the practice outside office hours. This research addresses the question: \textit{How can an AI-powered call center automate telephone services for dental practices while maintaining customer satisfaction?}
+
+For this project, a fully automated inbound call center was developed using \textbf{Twilio} for telephony infrastructure and \textbf{OpenAI GPT} for natural language processing. The system is built with ASP.NET Core and hosted on Microsoft Azure. The architecture utilizes webhooks for real-time communication between Twilio and the backend, with speech recognition (Speech-to-Text) and speech synthesis (Text-to-Speech) seamlessly integrated.
+
+The system supports three languages (Dutch, English, and French) and features five core functionalities through OpenAI's function calling mechanism: looking up customer data, cancelling appointments, rescheduling appointments, adding patients to the waitlist, and transferring calls to the practice. The AI assistant recognizes the caller's intent and automatically invokes the appropriate function via the TurnUp API.
+
+Results demonstrate that the system is available 24/7 without human intervention, with an average call duration of less than two minutes. All conversations are recorded and transcribed for quality control. The system integrates seamlessly with TurnUp's existing practice management software.
+
+This research concludes that conversational AI can be effectively deployed for customer service in the healthcare sector. The combination of Twilio and OpenAI provides a scalable, multilingual, and cost-effective solution that benefits both patients and practice staff. Future extensions include transitioning to WebSockets for faster real-time communication, outbound calling for appointment reminders, and RAG integration for answering practice-specific questions.
+
+\bigskip
+
+\textbf{GitHub repository:} \url{https://github.com/Abdilz/Mavzer_Abdil_GraduaatsProef-2025-2026.git}

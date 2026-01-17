@@ -1,0 +1,52 @@
+%==============================================================================
+% Sjabloon onderzoeksvoorstel bachproef
+%==============================================================================
+% Gebaseerd op document class `hogent-article'
+% zie <https://github.com/HoGentTIN/latex-hogent-article>
+
+\documentclass{hogent-article}
+
+% Invoegen bibliografiebestand
+\addbibresource{voorstel.bib}
+
+% Informatie over de opleiding, het vak en soort opdracht
+\studyprogramme{Graduaat in het Programmeren}
+\course{Graduaatsproef}
+\assignmenttype{Onderzoeksvoorstel}
+
+\academicyear{2025-2026}
+
+% Werktitel
+\title{AI-gestuurd Callcenter voor Tandartspraktijken: Automatisering van patiëntcommunicatie met Twilio en OpenAI}
+
+% Studentnaam en emailadres
+\author{Abdil Mavzer}
+\email{abdil.mavzer@student.hogent.be}
+
+% Co-promotor
+\supervisor[Co-promotor]{J. Decubber (TurnUp, \href{mailto:jona.decubber@turnup.be}{jona.decubber@turnup.be})}
+
+% Specialisatierichting
+\specialisation{Mobile \& Enterprise development}
+\keywords{OpenAI, Twilio, Voice AI, ASP.NET Core, Function Calling}
+
+\begin{document}
+
+\begin{abstract}
+Dit onderzoeksvoorstel beschrijft de ontwikkeling van een AI-gestuurd inbound callcenter voor tandartspraktijken. Tandartspraktijken besteden dagelijks aanzienlijke tijd aan telefonisch afspraakbeheer, wat leidt tot hoge werkdruk voor receptionisten en beperkte bereikbaarheid voor patiënten. De centrale onderzoeksvraag luidt: hoe kan een AI-gestuurd callcenter de telefonische dienstverlening automatiseren met behoud van klanttevredenheid? Het onderzoek richt zich op TurnUp, een Belgisch softwarebedrijf voor tandartspraktijken, als concrete casus. De methodologie omvat een literatuurstudie naar conversationele AI en telefonie-platformen, gevolgd door de ontwikkeling van een proof-of-concept met Twilio (telefonie) en OpenAI GPT (taalverwerking). Het verwachte resultaat is een werkend prototype dat 24/7 beschikbaar is, drie talen ondersteunt (NL/EN/FR), en afspraken kan beheren via OpenAI's function calling mechanisme. Dit onderzoek levert meerwaarde voor tandartspraktijken door de telefonische bereikbaarheid te verbeteren en administratieve lasten te verlagen.
+\end{abstract}
+
+\tableofcontents
+
+% De hoofdtekst van het voorstel zit in een apart bestand, zodat het makkelijk
+% kan opgenomen worden in de bijlagen van de graduaatsproef zelf.
+\input{voorstel-inhoud}
+
+%% Wijzig "Bibliografie" naar "Bronnenlijst"
+\DefineBibliographyStrings{dutch}{
+    bibliography = {Bronnenlijst},
+}
+
+\printbibliography[heading=bibintoc]
+
+\end{document}

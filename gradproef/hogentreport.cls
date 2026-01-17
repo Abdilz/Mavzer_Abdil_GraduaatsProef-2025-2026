@@ -46,6 +46,8 @@
 \newcommand{\academicyear}[1]{\def\@academicyear{#1}}
 \newcommand{\examperiod}[1]{\def\@examperiod{#1}}
 \newcommand{\degreesought}[1]{\def\@degreesought{#1}}
+\let\@institutionlogo\@empty
+\newcommand{\institutionlogo}[1]{\def\@institutionlogo{#1}}
 
 \define@choicekey*+{hogentreport}{department}[\@department\@department@nr]
 {dbo,dbt,dgz,dit,dlo,dog,dsa,soa}{}{%
@@ -476,9 +478,17 @@
       %% Print the name of the author
       \subtitlefont\Large\bfseries \@author\@addpunct{.}
     \endgroup
-    
+
+    %% Print institution logo if defined
+    \ifx\@institutionlogo\@empty\else
+      \vspace{1cm}
+      \begin{center}
+        \@institutionlogo
+      \end{center}
+    \fi
+
     \vfill
-    
+
     \if@thesis
       \begingroup
         \IfLanguageName{dutch}{%

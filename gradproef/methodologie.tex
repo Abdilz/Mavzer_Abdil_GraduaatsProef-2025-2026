@@ -5,26 +5,161 @@
 \chapter{\IfLanguageName{dutch}{Methodologie}{Methodology}}%
 \label{ch:methodologie}
 
-%% TODO: In dit hoofstuk geef je een korte toelichting over hoe je te werk bent
-%% gegaan. Verdeel je onderzoek in grote fasen, en licht in elke fase toe wat
-%% de doelstelling was, welke deliverables daar uit gekomen zijn, en welke
-%% onderzoeksmethoden je daarbij toegepast hebt. Verantwoord waarom je
-%% op deze manier te werk gegaan bent.
-%% 
-%% Voorbeelden van zulke fasen zijn: literatuurstudie, opstellen van een
-%% requirements-analyse, opstellen long-list (bij vergelijkende studie),
-%% selectie van geschikte tools (bij vergelijkende studie, "short-list"),
-%% opzetten testopstelling/PoC, uitvoeren testen en verzamelen
-%% van resultaten, analyse van resultaten, ...
-%%
-%% !!!!! LET OP !!!!!
-%%
-%% Het is uitdrukkelijk NIET de bedoeling dat je het grootste deel van de corpus
-%% van je graduaatsproef in dit hoofstuk verwerkt! Dit hoofdstuk is eerder een
-%% kort overzicht van je plan van aanpak.
-%%
-%% Maak voor elke fase (behalve het literatuuronderzoek) een NIEUW HOOFDSTUK aan
-%% en geef het een gepaste titel.
+Dit hoofdstuk beschrijft de aanpak en methodologie die werd gevolgd tijdens de ontwikkeling van het AI-gestuurde callcenter. Het project werd opgedeeld in verschillende fasen, elk met specifieke doelstellingen en deliverables.
 
-\lipsum[21-25]
+\section{Projectaanpak}
 
+De ontwikkeling volgde een iteratieve aanpak, waarbij het systeem stapsgewijs werd opgebouwd en getest. Deze methode werd gekozen omdat:
+
+\begin{itemize}
+    \item Real-time spraakverwerking moeilijk vooraf volledig te specificeren is
+    \item Gebruikersfeedback cruciaal is voor het verfijnen van de AI-prompts
+    \item De integratie met externe systemen (Twilio, OpenAI) onvoorziene uitdagingen kan opleveren
+\end{itemize}
+
+\section{Fase 1: Literatuurstudie en technologiekeuze}
+
+\subsection{Doelstelling}
+Onderzoeken welke technologieën het meest geschikt zijn voor het bouwen van een AI-gestuurd callcenter.
+
+\subsection{Aanpak}
+\begin{itemize}
+    \item Vergelijkende analyse van telefonie-platformen (Twilio, Vonage, Amazon Connect)
+    \item Evaluatie van AI-modellen (OpenAI GPT, Google PaLM, Anthropic Claude)
+    \item Onderzoek naar best practices voor conversationele AI
+\end{itemize}
+
+\subsection{Resultaat}
+De keuze viel op Twilio voor telefonie vanwege de uitgebreide documentatie en flexibele API's, en OpenAI GPT vanwege de superieure taalcapaciteiten en het function calling mechanisme.
+
+\section{Fase 2: Proof of Concept}
+
+\subsection{Doelstelling}
+Valideren dat de gekozen technologieën kunnen samenwerken voor een basis spraakgestuurde assistent.
+
+\subsection{Aanpak}
+\begin{enumerate}
+    \item Opzetten van een Twilio-account met een Belgisch telefoonnummer
+    \item Configureren van webhooks naar een lokale ontwikkelomgeving (via ngrok)
+    \item Implementeren van een minimale ASP.NET Core API
+    \item Integreren van OpenAI voor een simpele vraag-antwoord flow
+\end{enumerate}
+
+\subsection{Resultaat}
+Een werkend prototype dat inkomende oproepen kon beantwoorden en eenvoudige vragen kon beantwoorden. Dit bewees de haalbaarheid van de gekozen architectuur.
+
+\section{Fase 3: Systeemarchitectuur}
+
+\subsection{Doelstelling}
+Ontwerpen van een schaalbare en onderhoudbare architectuur voor het volledige systeem.
+
+\subsection{Aanpak}
+De architectuur werd ontworpen met de volgende componenten:
+
+\begin{itemize}
+    \item \textbf{TwilioController}: Ontvangt webhooks van Twilio en genereert TwiML responses
+    \item \textbf{OpenAIChatService}: Beheert de communicatie met de OpenAI API
+    \item \textbf{CallContext}: Houdt de staat van elk gesprek bij (conversatiegeschiedenis, acties)
+    \item \textbf{Tool handlers}: Implementeren de business logic voor elke AI-functie
+    \item \textbf{TurnUp API client}: Communiceert met de bestaande praktijksoftware
+\end{itemize}
+
+\subsection{Resultaat}
+Een gelaagde architectuur die separation of concerns respecteert en eenvoudig uitbreidbaar is.
+
+\section{Fase 4: Implementatie kernfunctionaliteiten}
+
+\subsection{Doelstelling}
+Implementeren van de vijf kernfuncties: klant opzoeken, afspraak annuleren, afspraak verzetten, wachtlijst, en doorverbinden.
+
+\subsection{Aanpak}
+Elke functie werd apart geïmplementeerd en getest:
+
+\begin{enumerate}
+    \item Definiëren van de function calling schema's voor OpenAI
+    \item Implementeren van de tool handlers in C\#
+    \item Koppelen aan de TurnUp API
+    \item Testen met gesimuleerde gesprekken
+    \item Verfijnen van de AI-prompts op basis van testresultaten
+\end{enumerate}
+
+\subsection{Resultaat}
+Alle vijf functies werden succesvol geïmplementeerd en geïntegreerd in de conversatieflow.
+
+\section{Fase 5: Prompt engineering}
+
+\subsection{Doelstelling}
+Optimaliseren van de system prompt zodat de AI-assistent zich gedraagt als een professionele en behulpzame medewerker.
+
+\subsection{Aanpak}
+De prompt werd iteratief verfijnd op basis van:
+
+\begin{itemize}
+    \item Testgesprekken met collega's en stakeholders
+    \item Analyse van edge cases en foutieve interpretaties
+    \item Feedback van TurnUp over gewenst gedrag
+\end{itemize}
+
+Belangrijke aspecten van de prompt:
+\begin{itemize}
+    \item Taalregels: strikt in de gekozen taal blijven
+    \item Gedragsregels: korte zinnen, één vraag per keer
+    \item Conversatieflows: gedetailleerde instructies per scenario
+    \item Foutafhandeling: wat te doen bij onverwachte input
+\end{itemize}
+
+\subsection{Resultaat}
+Een uitgebreide system prompt van meer dan 400 regels die alle scenario's afdekt.
+
+\section{Fase 6: Meertalige ondersteuning}
+
+\subsection{Doelstelling}
+Implementeren van ondersteuning voor Nederlands, Engels en Frans.
+
+\subsection{Aanpak}
+\begin{enumerate}
+    \item IVR-menu voor taalkeuze bij start van het gesprek
+    \item Dynamische system prompt gebaseerd op gekozen taal
+    \item Configuratie van Twilio's spraakherkenning per taal
+    \item Selectie van geschikte Text-to-Speech stemmen (Amazon Polly)
+\end{enumerate}
+
+\subsection{Resultaat}
+Het systeem ondersteunt drie talen met voor elke taal een passende stem en spraakherkenning.
+
+\section{Fase 7: Testing en verfijning}
+
+\subsection{Doelstelling}
+Identificeren en oplossen van edge cases en bugs.
+
+\subsection{Aanpak}
+\begin{itemize}
+    \item Handmatige tests met diverse scenario's
+    \item Tests met echte telefoonnummers
+    \item Analyse van gespreksopnames en transcripties
+    \item Iteratieve verbetering van prompts en code
+\end{itemize}
+
+\subsection{Resultaat}
+Een robuust systeem dat de meeste scenario's correct afhandelt.
+
+\section{Gebruikte tools en technologieën}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Categorie} & \textbf{Technologie} \\
+\midrule
+Programmeertaal & C\# (.NET 8) \\
+Framework & ASP.NET Core \\
+IDE & Visual Studio Code, Rider \\
+Telefonie & Twilio Programmable Voice \\
+AI & OpenAI GPT-4 \\
+Hosting & Microsoft Azure \\
+Versiebeheer & Git, GitHub \\
+Lokale tunneling & ngrok \\
+\bottomrule
+\end{tabular}
+\caption[Gebruikte technologieën]{Overzicht van gebruikte tools en technologieën}
+\end{table}

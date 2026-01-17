@@ -5,12 +5,6 @@
 
 \documentclass[dutch,dit,thesis]{hogentreport}
 
-% TODO:
-% - If necessary, replace the option `dit`' with your own department!
-%   Valid entries are dbo, dbt, dgz, dit, dlo, dog, dsa, soa
-% - If you write your thesis in English (remark: only possible after getting
-%   explicit approval!), remove the option "dutch," or replace with "english".
-
 \usepackage{lipsum} % For blind text, can be removed after adding actual content
 
 %% Pictures to include in the text can be put in the graphics/ folder
@@ -46,27 +40,50 @@
 }
 
 % Other packages not already included can be imported here
+\usepackage{tikz}
+\usetikzlibrary{positioning,shapes.geometric}
+
+%% Kleur voor Twilio logo
+\definecolor{twiliored}{RGB}{240, 77, 82}
 
 %%---------- Document metadata -------------------------------------------------
-% TODO: Replace this with your own information
-\author{Ernst Aarden}
-\supervisor{Dhr. F. Van Houte}
-\cosupervisor{Mevr. S. Beeckman}
-\title[Optionele ondertitel]%
-    {Titel van de graduaatsproef}
+\author{Abdil Mavzer}
+\supervisor{Dhr. L. Vervoort}
+\cosupervisor{Dhr. J. Decubber (TurnUp)}
+\title[Automatisering van patiëntcommunicatie met Twilio en OpenAI]%
+    {AI-gestuurd Callcenter voor Tandartspraktijken}
 \academicyear{\advance\year by -1 \the\year--\advance\year by 1 \the\year}
 \examperiod{1}
 \degreesought{\IfLanguageName{dutch}{Graduaat in het Programmeren}{Associate of applied computer science}}
 \partialthesis{false} %% To display 'in partial fulfilment'
-%\institution{Internshipcompany BVBA.}
+\institution{TurnUp}
+
+%% Twilio logo op de titelpagina (groter en gecentreerd)
+\institutionlogo{%
+    \begin{tikzpicture}[scale=2.0]
+        % Main circle
+        \fill[twiliored] (0,0) circle (1.2cm);
+        % Inner white dots pattern (Twilio's signature dots)
+        \fill[white] (-0.4, 0.4) circle (0.18cm);
+        \fill[white] (0.4, 0.4) circle (0.18cm);
+        \fill[white] (-0.4, -0.4) circle (0.18cm);
+        \fill[white] (0.4, -0.4) circle (0.18cm);
+    \end{tikzpicture}\\[0.5cm]
+    {\LARGE\bfseries\color{twiliored} Twilio}%
+}
 
 %% Add global exceptions to the hyphenation here
-\hyphenation{back-slash}
+\hyphenation{back-slash OpenAI Twilio}
 
 %% The bibliography (style and settings are  found in hogentthesis.cls)
-\addbibresource{bachproef.bib}            %% Bibliography file
+\addbibresource{gradproef.bib}            %% Bibliography file
 \addbibresource{../voorstel/voorstel.bib} %% Bibliography research proposal
 \defbibheading{bibempty}{}
+
+%% Wijzig "Bibliografie" naar "Bronnenlijst"
+\DefineBibliographyStrings{dutch}{
+    bibliography = {Bronnenlijst},
+}
 
 %% Prevent empty pages for right-handed chapter starts in twoside mode
 \renewcommand{\cleardoublepage}{\clearpage}
@@ -138,9 +155,8 @@
 % vormen. De structuur en titels hangen af van je eigen onderzoek. Je kan bv.
 % elke fase in je onderzoek in een apart hoofdstuk bespreken.
 
-%\input{...}
-%\input{...}
-%...
+\input{implementatie}
+\input{resultaten}
 
 \input{conclusie}
 
@@ -152,7 +168,7 @@
 
 Het onderwerp van deze graduaatsproef is gebaseerd op een onderzoeksvoorstel dat vooraf werd beoordeeld door de promotor. Dat voorstel is opgenomen in deze bijlage.
 
-%% TODO: 
+%% TODO:
 %\section*{Samenvatting}
 
 % Kopieer en plak hier de samenvatting (abstract) van je onderzoeksvoorstel.
@@ -170,6 +186,7 @@ Het onderwerp van deze graduaatsproef is gebaseerd op een onderzoeksvoorstel dat
 \backmatter{}
 
 \setlength\bibitemsep{2pt} %% Add Some space between the bibliograpy entries
+\nocite{*} %% Include all bibliography entries, not just cited ones
 \printbibliography[heading=bibintoc]
 
 \end{document}

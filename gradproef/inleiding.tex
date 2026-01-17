@@ -5,46 +5,84 @@
 \chapter{\IfLanguageName{dutch}{Inleiding}{Introduction}}%
 \label{ch:inleiding}
 
-De inleiding moet de lezer net genoeg informatie verschaffen om het onderwerp te begrijpen en in te zien waarom de onderzoeksvraag de moeite waard is om te onderzoeken. In de inleiding ga je literatuurverwijzingen beperken, zodat de tekst vlot leesbaar blijft. Je kan de inleiding verder onderverdelen in secties als dit de tekst verduidelijkt. Zaken die aan bod kunnen komen in de inleiding~\autocite{Pollefliet2011}:
+De zorgsector staat voor een toenemende digitalisering, waarbij kunstmatige intelligentie (AI) een steeds prominentere rol speelt. Tandartspraktijken vormen hierop geen uitzondering: zij ontvangen dagelijks tientallen telefoontjes van patiënten die informatie willen over hun afspraken, een afspraak willen annuleren of verzetten, of simpelweg doorverbonden willen worden met de praktijk. Deze repetitieve taken leggen een aanzienlijke druk op het administratief personeel en beperken de bereikbaarheid tot kantooruren.
 
-\begin{itemize}
-  \item context, achtergrond
-  \item afbakenen van het onderwerp
-  \item verantwoording van het onderwerp, methodologie
-  \item probleemstelling
-  \item onderzoeksdoelstelling
-  \item onderzoeksvraag
-  \item \ldots
-\end{itemize}
+TurnUp, een Belgisch softwarebedrijf gespecialiseerd in praktijkbeheersoftware voor tandartsen, zag een opportuniteit om deze uitdaging aan te pakken met moderne AI-technologieën. Dit project onderzoekt de haalbaarheid en implementatie van een AI-gestuurd inbound callcenter dat volledig geautomatiseerd patiëntoproepen kan afhandelen.
 
 \section{\IfLanguageName{dutch}{Probleemstelling}{Problem Statement}}%
 \label{sec:probleemstelling}
 
-Uit je probleemstelling moet duidelijk zijn dat je onderzoek een meerwaarde heeft voor een concrete doelgroep. De doelgroep moet goed gedefinieerd en afgelijnd zijn. Doelgroepen als ``bedrijven,'' ``KMO's'', systeembeheerders, enz.~zijn nog te vaag. Als je een lijstje kan maken van de personen/organisaties die een meerwaarde zullen vinden in deze bachelorproef (dit is eigenlijk je steekproefkader), dan is dat een indicatie dat de doelgroep goed gedefinieerd is. Dit kan een enkel bedrijf zijn of zelfs één persoon (je co-promotor/opdrachtgever).
+Tandartspraktijken worden geconfronteerd met verschillende uitdagingen op het gebied van telefonische bereikbaarheid:
+
+\begin{itemize}
+    \item \textbf{Beperkte bereikbaarheid}: Patiënten kunnen enkel tijdens kantooruren telefonisch terecht, terwijl veel mensen net dan aan het werk zijn.
+    \item \textbf{Wachttijden}: Tijdens piekmomenten (bijvoorbeeld maandagochtend) ontstaan er wachtrijen, wat leidt tot frustratie bij patiënten.
+    \item \textbf{Repetitieve taken}: Receptionisten besteden een groot deel van hun tijd aan standaardvragen die eenvoudig geautomatiseerd kunnen worden.
+    \item \textbf{Meertaligheid}: In België is meertalige ondersteuning (Nederlands, Frans, Engels) vaak een vereiste, wat extra complexiteit toevoegt.
+    \item \textbf{Kosten}: Het aannemen van extra personeel voor telefonische ondersteuning is kostbaar en niet altijd rendabel.
+\end{itemize}
+
+De doelgroep van dit onderzoek bestaat uit tandartspraktijken die gebruik maken van de TurnUp praktijkbeheersoftware en die hun telefonische bereikbaarheid willen verbeteren zonder extra personeel aan te werven. Concreet richt dit project zich op de implementatie voor TurnUp zelf, met het oog op een bredere uitrol naar hun klantenbestand.
 
 \section{\IfLanguageName{dutch}{Onderzoeksvraag}{Research question}}%
 \label{sec:onderzoeksvraag}
 
-Wees zo concreet mogelijk bij het formuleren van je onderzoeksvraag. Een onderzoeksvraag is trouwens iets waar nog niemand op dit moment een antwoord heeft (voor zover je kan nagaan). Het opzoeken van bestaande informatie (bv. ``welke tools bestaan er voor deze toepassing?'') is dus geen onderzoeksvraag. Je kan de onderzoeksvraag verder specifiëren in deelvragen. Bv.~als je onderzoek gaat over performantiemetingen, dan 
+De centrale onderzoeksvraag van deze graduaatsproef luidt:
+
+\begin{quote}
+\textit{Hoe kan een AI-gestuurd callcenter de telefonische dienstverlening van tandartspraktijken automatiseren met behoud van klanttevredenheid?}
+\end{quote}
+
+Deze hoofdvraag wordt opgesplitst in de volgende deelvragen:
+
+\begin{enumerate}
+    \item Welke technologieën zijn het meest geschikt voor spraakgestuurde AI-assistenten in een professionele context?
+    \item Hoe kan OpenAI's function calling mechanisme worden ingezet voor gestructureerde acties zoals afspraakbeheer?
+    \item Welke architectuur is nodig om real-time spraakverwerking te realiseren met acceptabele latency?
+    \item Hoe kan meertalige ondersteuning worden geïmplementeerd zonder de gebruikerservaring te compromitteren?
+    \item Welke edge cases en foutscenario's moeten worden afgehandeld voor een robuust systeem?
+\end{enumerate}
 
 \section{\IfLanguageName{dutch}{Onderzoeksdoelstelling}{Research objective}}%
 \label{sec:onderzoeksdoelstelling}
 
-Wat is het beoogde resultaat van je graduaatsproef? Wat zijn de criteria voor succes? Beschrijf die zo concreet mogelijk. Gaat het bv.\ om een proof-of-concept, een prototype, een verslag met aanbevelingen, een vergelijkende studie, enz.
+Het beoogde resultaat van deze graduaatsproef is een werkend prototype van een AI-gestuurd inbound callcenter dat:
+
+\begin{itemize}
+    \item Inkomende telefoontjes automatisch kan beantwoorden via Twilio
+    \item Patiënten in natuurlijke taal te woord staat via OpenAI GPT
+    \item Ondersteuning biedt voor Nederlands, Engels en Frans
+    \item De volgende acties kan uitvoeren:
+    \begin{itemize}
+        \item Klantgegevens en afspraken opzoeken
+        \item Afspraken annuleren na expliciete bevestiging
+        \item Afspraken verzetten naar een nieuw tijdstip
+        \item Patiënten toevoegen aan de wachtlijst voor nieuwe afspraken
+        \item Doorverbinden naar de praktijk indien gewenst
+    \end{itemize}
+    \item Integreert met de bestaande TurnUp API
+    \item Gesprekken opneemt en transcribeert voor kwaliteitscontrole
+\end{itemize}
+
+De criteria voor succes zijn:
+\begin{itemize}
+    \item Het systeem kan gesprekken afhandelen zonder menselijke tussenkomst
+    \item De gemiddelde gespreksduur blijft onder de 3 minuten
+    \item Het systeem is 24/7 beschikbaar
+    \item De latency tussen spraakherkenning en AI-respons blijft onder de 2 seconden
+\end{itemize}
 
 \section{\IfLanguageName{dutch}{Opzet van deze graduaatsproef}{Structure of this associate thesis}}%
 \label{sec:opzet-graduaatsproef}
 
-% Het is gebruikelijk aan het einde van de inleiding een overzicht te
-% geven van de opbouw van de rest van de tekst. Deze sectie bevat al een aanzet
-% die je kan aanvullen/aanpassen in functie van je eigen tekst.
-
 De rest van deze graduaatsproef is als volgt opgebouwd:
 
-In Hoofdstuk~\ref{ch:stand-van-zaken} wordt een overzicht gegeven van de stand van zaken binnen het onderzoeksdomein, op basis van een literatuurstudie.
+In Hoofdstuk~\ref{ch:stand-van-zaken} wordt een overzicht gegeven van de stand van zaken binnen het onderzoeksdomein. Hierbij worden de gebruikte technologieën (Twilio, OpenAI, ASP.NET Core) toegelicht en wordt de context geschetst van AI in klantenservice.
 
-In Hoofdstuk~\ref{ch:methodologie} wordt de methodologie toegelicht en worden de gebruikte onderzoekstechnieken besproken om een antwoord te kunnen formuleren op de onderzoeksvragen.
+In Hoofdstuk~\ref{ch:methodologie} wordt de methodologie toegelicht en worden de gebruikte onderzoekstechnieken besproken. De ontwikkelaanpak en de verschillende fasen van het project komen hier aan bod.
 
-% TODO: Vul hier aan voor je eigen hoofstukken, één of twee zinnen per hoofdstuk
+In Hoofdstuk~\ref{ch:implementatie} wordt de technische implementatie in detail besproken, inclusief de systeemarchitectuur, de integratie van Twilio en OpenAI, en de werking van het function calling mechanisme.
 
-In Hoofdstuk~\ref{ch:conclusie}, tenslotte, wordt de conclusie gegeven en een antwoord geformuleerd op de onderzoeksvragen. Daarbij wordt ook een aanzet gegeven voor toekomstig onderzoek binnen dit domein.
+In Hoofdstuk~\ref{ch:resultaten} worden de resultaten gepresenteerd en geanalyseerd. Hierbij wordt gekeken naar de prestaties van het systeem en de opgedane leerpunten.
+
+In Hoofdstuk~\ref{ch:conclusie}, tenslotte, wordt de conclusie gegeven en een antwoord geformuleerd op de onderzoeksvragen. Daarbij wordt ook een aanzet gegeven voor toekomstig onderzoek en mogelijke uitbreidingen.

@@ -1,84 +1,185 @@
 %---------- Inleiding ---------------------------------------------------------
 
-% TODO: Is dit voorstel gebaseerd op een paper van Research Methods die je
-% vorig jaar hebt ingediend? Heb je daarbij eventueel samengewerkt met een
-% andere student?
-% Zo ja, haal dan de tekst hieronder uit commentaar en pas aan.
-
-%\paragraph{Opmerking}
-
-% Dit voorstel is gebaseerd op het onderzoeksvoorstel dat werd geschreven in het
-% kader van het vak Research Methods dat ik (vorig/dit) academiejaar heb
-% uitgewerkt (met medesturent VOORNAAM NAAM als mede-auteur).
-% 
-
 \section{Inleiding}%
 \label{sec:inleiding}
 
-Waarover zal je graduaatsproef gaan? Introduceer het thema en zorg dat volgende zaken zeker duidelijk aanwezig zijn:
+De zorgsector ondergaat een snelle digitalisering, waarbij kunstmatige intelligentie (AI) een steeds belangrijkere rol speelt in het verbeteren van patiëntervaring en operationele efficiëntie. Tandartspraktijken vormen hierop geen uitzondering: zij ontvangen dagelijks tientallen telefoontjes van patiënten die informatie willen over hun afspraken, een afspraak willen annuleren of verzetten, of doorverbonden willen worden met de praktijk.
+
+\subsection{Probleemstelling}
+
+Het telefonisch afhandelen van afspraakgerelateerde vragen brengt verschillende uitdagingen met zich mee:
 
 \begin{itemize}
-  \item kaderen thema
-  \item de doelgroep
-  \item de probleemstelling en (centrale) onderzoeksvraag
-  \item de onderzoeksdoelstelling
+    \item \textbf{Beperkte bereikbaarheid}: Patiënten kunnen enkel tijdens kantooruren terecht, terwijl veel mensen net dan aan het werk zijn.
+    \item \textbf{Wachttijden}: Tijdens piekmomenten ontstaan er wachtrijen, wat leidt tot frustratie.
+    \item \textbf{Repetitieve taken}: Receptionisten besteden veel tijd aan standaardvragen die potentieel geautomatiseerd kunnen worden.
+    \item \textbf{Meertaligheid}: In België is ondersteuning voor Nederlands, Frans en Engels vaak noodzakelijk.
+    \item \textbf{Kosten}: Extra personeel aannemen voor telefonische ondersteuning is kostbaar.
 \end{itemize}
 
-Denk er aan: een typische graduaatsproef is \textit{toegepast onderzoek}, wat betekent dat je start vanuit een concrete probleemsituatie in bedrijfscontext, een \textbf{casus}. Het is belangrijk om je onderwerp goed af te bakenen: je gaat voor die \textit{ene specifieke probleemsituatie} op zoek naar een goede oplossing, op basis van de huidige kennis in het vakgebied.
+\subsection{Doelgroep}
 
-De doelgroep moet ook concreet en duidelijk zijn, dus geen algemene of vaag gedefinieerde groepen zoals \emph{bedrijven}, \emph{developers}, \emph{Vlamingen}, enz. Je richt je in elk geval op it-professionals, een bachelorproef is geen populariserende tekst. Eén specifiek bedrijf (die te maken hebben met een concrete probleemsituatie) is dus beter dan \emph{bedrijven} in het algemeen.
+Dit onderzoek richt zich op \textbf{TurnUp}, een Belgisch softwarebedrijf gespecialiseerd in praktijkbeheersoftware voor tandartsen. TurnUp zoekt naar innovatieve manieren om hun klanten te ondersteunen bij het verbeteren van de telefonische bereikbaarheid. Het ontwikkelde systeem zal worden geïntegreerd met de bestaande TurnUp API.
 
-Formuleer duidelijk de onderzoeksvraag! De begeleiders lezen nog steeds te veel voorstellen waarin we geen onderzoeksvraag terugvinden.
+\subsection{Onderzoeksvraag}
 
-Schrijf ook iets over de doelstelling. Wat zie je als het concrete eindresultaat van je onderzoek, naast de uitgeschreven scriptie? Is het een proof-of-concept, een rapport met aanbevelingen, \ldots Met welk eindresultaat kan je je bachelorproef als een succes beschouwen?
+De centrale onderzoeksvraag luidt:
+
+\begin{quote}
+\textit{Hoe kan een AI-gestuurd callcenter de telefonische dienstverlening van tandartspraktijken automatiseren met behoud van klanttevredenheid?}
+\end{quote}
+
+Hieruit vloeien de volgende deelvragen voort:
+\begin{enumerate}
+    \item Welke technologieën zijn het meest geschikt voor spraakgestuurde AI-assistenten?
+    \item Hoe kan OpenAI's function calling mechanisme worden ingezet voor afspraakbeheer?
+    \item Welke architectuur is nodig voor real-time spraakverwerking met acceptabele latency?
+    \item Hoe kan meertalige ondersteuning worden geïmplementeerd?
+\end{enumerate}
+
+\subsection{Onderzoeksdoelstelling}
+
+Het concrete eindresultaat van dit onderzoek is een \textbf{werkend proof-of-concept} van een AI-gestuurd inbound callcenter dat:
+\begin{itemize}
+    \item Inkomende oproepen automatisch beantwoordt via Twilio
+    \item Patiënten in natuurlijke taal te woord staat via OpenAI GPT
+    \item Afspraken kan opzoeken, annuleren en verzetten
+    \item Drie talen ondersteunt (Nederlands, Engels, Frans)
+    \item Integreert met de TurnUp API
+\end{itemize}
 
 %---------- Stand van zaken ---------------------------------------------------
 
 \section{Literatuurstudie}%
 \label{sec:literatuurstudie}
 
-Hier beschrijf je de \emph{state-of-the-art} rondom je gekozen onderzoeksdomein, d.w.z.\ een inleidende, doorlopende tekst over het onderzoeksdomein van je graduaatsproef. Je steunt daarbij heel sterk op de professionele \emph{vakliteratuur}, en niet zozeer op populariserende teksten voor een breed publiek. Wat is de huidige stand van zaken in dit domein, en wat zijn nog eventuele open vragen (die misschien de aanleiding waren tot je onderzoeksvraag!)?
+\subsection{Conversationele AI}
 
-Je mag de titel van deze sectie ook aanpassen (literatuurstudie, stand van zaken, enz.). Zijn er al gelijkaardige onderzoeken gevoerd? Wat concluderen ze? Wat is het verschil met jouw onderzoek?
+De evolutie van Interactive Voice Response (IVR) systemen naar conversationele AI markeert een significante verschuiving in klantenservice. Traditionele IVR-systemen werken met rigide keuzemenu's, terwijl moderne AI-systemen natuurlijke taal kunnen begrijpen en contextbewust kunnen reageren~\autocite{OpenAI2023}.
 
-Verwijs bij elke introductie van een term of bewering over het domein naar de vakliteratuur, bijvoorbeeld~\autocite{Hykes2013}! Denk zeker goed na welke werken je refereert en waarom.
+Large Language Models (LLMs) zoals GPT-4 hebben deze transitie mogelijk gemaakt. Deze modellen zijn getraind op enorme hoeveelheden tekstdata en kunnen menselijke taal begrijpen, genereren en zelfs gestructureerde acties uitvoeren via het function calling mechanisme~\autocite{OpenAI2024}.
 
-Draag zorg voor correcte literatuurverwijzingen! Een bronvermelding hoort thuis \emph{binnen} de zin waar je je op die bron baseert, dus niet er buiten! Maak meteen een verwijzing als je gebruik maakt van een bron. Doe dit dus \emph{niet} aan het einde van een lange paragraaf. Baseer nooit teveel aansluitende tekst op eenzelfde bron.
+\subsection{Twilio en programmeerbare telefonie}
 
-Als je informatie over bronnen verzamelt in JabRef, zorg er dan voor dat alle nodige info aanwezig is om de bron terug te vinden (zoals uitvoerig besproken in de lessen Research Methods).
+Twilio is een cloud communications platform dat API's aanbiedt voor spraak, SMS en andere communicatiekanalen. De Programmable Voice API maakt het mogelijk om inkomende oproepen te ontvangen, spraakherkenning uit te voeren, en tekst om te zetten naar spraak~\autocite{Twilio2024}.
 
-% Voor literatuurverwijzingen zijn er twee belangrijke commando's:
-% \autocite{KEY} => (Auteur, jaartal) Gebruik dit als de naam van de auteur
-%   geen onderdeel is van de zin.
-% \textcite{KEY} => Auteur (jaartal)  Gebruik dit als de auteursnaam wel een
-%   functie heeft in de zin (bv. ``Uit onderzoek door Doll & Hill (1954) bleek
-%   ...'')
+Twilio communiceert met backend-systemen via webhooks: bij elke fase van een gesprek stuurt Twilio een HTTP-request naar een geconfigureerde endpoint. Dit vereist dat de backend binnen 15 seconden kan reageren.
 
-Je mag deze sectie nog verder onderverdelen in subsecties als dit de structuur van de tekst kan verduidelijken.
+\subsection{OpenAI Function Calling}
+
+Een recente ontwikkeling die cruciaal is voor dit project is OpenAI's function calling mechanisme. Dit stelt het taalmodel in staat om niet alleen tekst te genereren, maar ook gestructureerde functies aan te roepen met de juiste parameters~\autocite{OpenAI2024}. Hierdoor kan het model bijvoorbeeld herkennen dat een gebruiker een afspraak wil annuleren en automatisch de juiste API-aanroep triggeren.
+
+\subsection{Vergelijkbare oplossingen}
+
+Er bestaan reeds commerciële oplossingen voor AI-telefonie, zoals Google Dialogflow, Amazon Connect en Twilio Flex. Het voordeel van een custom oplossing is de volledige controle over de gebruikerservaring en de mogelijkheid tot diepe integratie met bestaande systemen zoals de TurnUp API.
 
 %---------- Methodologie ------------------------------------------------------
+
 \section{Methodologie}%
 \label{sec:methodologie}
 
-Hier beschrijf je hoe je van plan bent het onderzoek te voeren. Welke onderzoekstechniek ga je toepassen om elk van je onderzoeksvragen te beantwoorden? Gebruik je hiervoor literatuurstudie, interviews met belanghebbenden (bv.~voor requirements-analyse), experimenten, simulaties, vergelijkende studie, risico-analyse, PoC, \ldots?
+Het onderzoek wordt opgedeeld in de volgende fasen:
 
-Valt je onderwerp onder één van de typische soorten graduaatsproeven die besproken zijn in de lessen Research Methods (bv.\ vergelijkende studie of risico-analyse)? Zorg er dan ook voor dat we duidelijk de verschillende stappen terug vinden die we verwachten in dit soort onderzoek!
+\subsection{Fase 1: Literatuurstudie (2 weken)}
 
-Vermijd onderzoekstechnieken die geen objectieve, meetbare resultaten kunnen opleveren. Enquêtes, bijvoorbeeld, zijn voor een graduaatsproef informatica meestal \textbf{niet geschikt}. De antwoorden zijn eerder meningen dan feiten en in de praktijk blijkt het ook bijzonder moeilijk om voldoende respondenten te vinden. Studenten die een enquête willen voeren, hebben meestal ook geen goede definitie van de populatie, waardoor ook niet kan aangetoond worden dat eventuele resultaten representatief zijn.
+\textbf{Doel}: Diepgaand onderzoek naar de state-of-the-art in conversationele AI en telefonie-integratie.
 
-Uit dit onderdeel moet duidelijk naar voor komen dat je graduaatsproef ook technisch voldoen\-de diepgang zal bevatten. Het zou niet kloppen als een graduaatsproef informatica ook door bv.\ een student marketing zou kunnen uitgevoerd worden.
+\textbf{Aanpak}: Analyse van documentatie van Twilio, OpenAI en vergelijkbare platformen. Evaluatie van best practices voor prompt engineering en function calling.
 
-Je beschrijft ook al welke tools (hardware, software, diensten, \ldots) je denkt hiervoor te gebruiken of te ontwikkelen.
+\textbf{Deliverable}: Rapport met technologiekeuze en architectuurvoorstel.
 
-Probeer ook een tijdschatting te maken. Hoe lang zal je met elke fase van je onderzoek bezig zijn en wat zijn de concrete \emph{deliverables} in elke fase?
+\subsection{Fase 2: Proof of Concept (3 weken)}
+
+\textbf{Doel}: Valideren dat Twilio en OpenAI kunnen samenwerken voor een basis spraakassistent.
+
+\textbf{Aanpak}:
+\begin{itemize}
+    \item Opzetten Twilio-account met Belgisch telefoonnummer
+    \item Implementeren ASP.NET Core backend met webhooks
+    \item Integreren OpenAI voor eenvoudige vraag-antwoord flow
+\end{itemize}
+
+\textbf{Deliverable}: Werkend prototype dat oproepen kan beantwoorden.
+
+\subsection{Fase 3: Implementatie kernfunctionaliteiten (4 weken)}
+
+\textbf{Doel}: Ontwikkelen van de vijf kernfuncties via function calling.
+
+\textbf{Aanpak}:
+\begin{itemize}
+    \item Definiëren function calling schema's
+    \item Implementeren tool handlers in C\#
+    \item Koppelen aan TurnUp API
+    \item Iteratief testen en verfijnen van prompts
+\end{itemize}
+
+\textbf{Deliverable}: Volledig functioneel systeem met alle kernfuncties.
+
+\subsection{Fase 4: Meertalige ondersteuning (2 weken)}
+
+\textbf{Doel}: Implementeren van Nederlands, Engels en Frans.
+
+\textbf{Aanpak}: IVR-menu voor taalkeuze, taalspecifieke prompts, configuratie spraakherkenning per taal.
+
+\textbf{Deliverable}: Meertalig systeem met passende Text-to-Speech stemmen.
+
+\subsection{Fase 5: Testing en documentatie (3 weken)}
+
+\textbf{Doel}: Uitgebreid testen en documenteren van het systeem.
+
+\textbf{Aanpak}: Handmatige tests, analyse van edge cases, schrijven van technische documentatie en graduaatsproefverslag.
+
+\textbf{Deliverable}: Getest systeem en afgewerkt verslag.
+
+\subsection{Gebruikte tools}
+
+\begin{itemize}
+    \item \textbf{Programmeertaal}: C\# (.NET 8)
+    \item \textbf{Framework}: ASP.NET Core
+    \item \textbf{Telefonie}: Twilio Programmable Voice
+    \item \textbf{AI}: OpenAI GPT-4 met function calling
+    \item \textbf{Hosting}: Microsoft Azure
+    \item \textbf{IDE}: Visual Studio Code, JetBrains Rider
+\end{itemize}
 
 %---------- Verwachte resultaten ----------------------------------------------
+
 \section{Verwacht resultaat, conclusie}%
 \label{sec:verwachte_resultaten}
 
-Hier beschrijf je welke resultaten je verwacht. Als je metingen en simulaties uitvoert, kan je hier al mock-ups maken van de grafieken samen met de verwachte conclusies. Benoem zeker al je assen en de onderdelen van de grafiek die je gaat gebruiken. Dit zorgt ervoor dat je concreet weet welk soort data je moet verzamelen en hoe je die moet meten.
+\subsection{Verwachte resultaten}
 
-Wat heeft de doelgroep van je onderzoek aan het resultaat? Op welke manier zorgt jouw graduaatsproef voor een meerwaarde?
+Op basis van de literatuurstudie en vooronderzoek worden de volgende resultaten verwacht:
 
-Hier beschrijf je wat je verwacht uit je onderzoek, met de motivatie waarom. Het is \textbf{niet} erg indien uit je onderzoek andere resultaten en conclusies vloeien dan dat je hier beschrijft: het is dan juist interessant om te onderzoeken waarom jouw hypothesen niet overeenkomen met de resultaten.
+\begin{itemize}
+    \item Een werkend AI-callcenter dat 24/7 beschikbaar is
+    \item Succesvolle afhandeling van minimaal 80\% van de standaard scenario's (afspraak opzoeken, annuleren, verzetten)
+    \item Gemiddelde gespreksduur van minder dan 3 minuten
+    \item Latency van minder dan 5 seconden tussen vraag en antwoord
+    \item Volledige meertalige ondersteuning (NL/EN/FR)
+\end{itemize}
 
+\subsection{Meerwaarde voor de doelgroep}
+
+Dit onderzoek levert concrete meerwaarde voor TurnUp en hun klanten:
+
+\begin{itemize}
+    \item \textbf{Verbeterde bereikbaarheid}: Patiënten kunnen 24/7 terecht, ook buiten kantooruren.
+    \item \textbf{Lagere werkdruk}: Receptionisten worden ontlast van repetitieve taken.
+    \item \textbf{Kostenefficiëntie}: Geen extra personeel nodig voor telefonische ondersteuning.
+    \item \textbf{Schaalbaarheid}: Het systeem kan meerdere gesprekken gelijktijdig afhandelen.
+    \item \textbf{Innovatie}: TurnUp kan zich onderscheiden met een moderne AI-oplossing.
+\end{itemize}
+
+\subsection{Mogelijke uitbreidingen}
+
+Als het basisproject succesvol is, zijn de volgende uitbreidingen mogelijk:
+\begin{itemize}
+    \item Outbound calling voor proactieve afspraakherinneringen
+    \item Integratie met andere zorgsectoren (huisartsen, kinesisten)
+    \item RAG-integratie voor beantwoorden van praktijkspecifieke vragen
+\end{itemize}
+
+\subsection{Conclusie}
+
+De combinatie van Twilio voor telefonie en OpenAI voor natuurlijke taalverwerking biedt een veelbelovende basis voor het automatiseren van klantenservice in de zorgsector. Dit onderzoek zal aantonen of en hoe deze technologieën effectief kunnen worden ingezet voor tandartspraktijken, met concrete aanbevelingen voor verdere implementatie.

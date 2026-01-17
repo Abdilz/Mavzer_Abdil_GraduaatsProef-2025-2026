@@ -1,0 +1,166 @@
+%%=============================================================================
+%% Resultaten
+%%=============================================================================
+
+\chapter{Resultaten}%
+\label{ch:resultaten}
+
+Dit hoofdstuk presenteert de resultaten van het ontwikkelde AI-callcenter en bespreekt de opgedane leerpunten tijdens het project.
+
+\section{Functionele resultaten}
+
+Het ontwikkelde systeem voldoet aan alle gestelde functionele eisen:
+
+\subsection{Kernfunctionaliteiten}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Functionaliteit} & \textbf{Geïmplementeerd} & \textbf{Getest} \\
+\midrule
+Klantgegevens opzoeken & \checkmark & \checkmark \\
+Afspraak annuleren & \checkmark & \checkmark \\
+Afspraak verzetten & \checkmark & \checkmark \\
+Toevoegen aan wachtlijst & \checkmark & \checkmark \\
+Doorverbinden naar praktijk & \checkmark & \checkmark \\
+Meertalige ondersteuning (NL/EN/FR) & \checkmark & \checkmark \\
+Gespreksopname & \checkmark & \checkmark \\
+Transcriptie & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}
+\caption[Functionele resultaten]{Overzicht van geïmplementeerde en geteste functionaliteiten}
+\end{table}
+
+\subsection{Prestaties}
+
+De belangrijkste prestatie-indicatoren van het systeem:
+
+\begin{itemize}
+    \item \textbf{Beschikbaarheid}: 24/7 zonder menselijke tussenkomst
+    \item \textbf{Gemiddelde gespreksduur}: minder dan 2 minuten voor standaard scenario's
+    \item \textbf{Latency}: gemiddeld 2-4 seconden tussen vraag en antwoord
+    \item \textbf{Succesratio}: circa 85\% van de gesprekken wordt succesvol afgehandeld
+\end{itemize}
+
+\section{Technische bevindingen}
+
+\subsection{Uitdagingen en oplossingen}
+
+Tijdens de ontwikkeling werden verschillende technische uitdagingen overwonnen:
+
+\subsubsection{Twilio Timeout}
+
+\textbf{Probleem}: Twilio hanteert een strikte timeout van 15 seconden voor webhook responses. Bij complexe OpenAI-aanroepen werd deze soms overschreden.
+
+\textbf{Oplossing}: Implementatie van een interne timeout van 14 seconden met fallback naar een standaard ``Kunt u dat herhalen?'' response.
+
+\subsubsection{Spraakherkenning van telefoonnummers}
+
+\textbf{Probleem}: Telefoonnummers worden door spraakherkenning vaak incorrect getranscribeerd (bijvoorbeeld ``nul vier'' in plaats van ``04'').
+
+\textbf{Oplossing}: Uitgebreide normalisatie-logica die verschillende formaten herkent en converteert naar het standaard E.164 formaat.
+
+\subsubsection{Context behoud over meerdere beurten}
+
+\textbf{Probleem}: De AI vergat soms eerder opgezochte informatie wanneer de gebruiker van onderwerp wisselde.
+
+\textbf{Oplossing}: Implementatie van een dynamische context die bij elke beurt aan de prompt wordt toegevoegd, met expliciete instructies over wat al bekend is.
+
+\subsubsection{Meertalige prompts}
+
+\textbf{Probleem}: De AI wisselde soms ongewild van taal of mengde talen.
+
+\textbf{Oplossing}: Strikte taalinstructies aan het begin van de prompt en dynamische taalspecifieke voorbeeldzinnen.
+
+\subsection{Webhook-architectuur}
+
+De webhook-gebaseerde architectuur bleek effectief maar heeft beperkingen:
+
+\textbf{Voordelen}:
+\begin{itemize}
+    \item Eenvoudig te implementeren en debuggen
+    \item Goede ondersteuning door Twilio
+    \item Stateless backend mogelijk
+\end{itemize}
+
+\textbf{Nadelen}:
+\begin{itemize}
+    \item Elke beurt vereist een aparte HTTP-aanroep
+    \item Latency door network round-trips
+    \item Twilio timeout beperkt complexiteit van verwerking
+\end{itemize}
+
+\textbf{Toekomstige verbetering}: Overgang naar WebSockets zou de latency significant kunnen verlagen en meer complexe real-time interacties mogelijk maken.
+
+\section{Leerpunten}
+
+Dit project heeft geleid tot significante persoonlijke en professionele groei op verschillende vlakken:
+
+\subsection{Technische vaardigheden}
+
+\begin{itemize}
+    \item \textbf{Webhooks}: Diepgaande ervaring met asynchroon communiceren tussen externe services en de backend. Het begrijpen van callback-patronen en het correct afhandelen van meerdere gelijktijdige requests.
+
+    \item \textbf{AI-integratie}: Praktische ervaring met prompt engineering en OpenAI's function calling mechanisme. Het leren balanceren tussen instructie-detail en flexibiliteit in AI-prompts.
+
+    \item \textbf{Real-time systemen}: Inzicht in de uitdagingen van lage-latency spraakverwerking. Het belang van timeout-management en graceful degradation.
+
+    \item \textbf{Cloud deployment}: Hands-on ervaring met Azure-services, met name Key Vault voor secrets management en Blob Storage voor media-opslag.
+\end{itemize}
+
+\subsection{Professionele vaardigheden}
+
+\begin{itemize}
+    \item \textbf{Zelfstandig werken}: Het project vereiste veel eigen onderzoek en probleemoplossend denken. Documentatie lezen, experimenteren, en itereren waren dagelijkse bezigheden.
+
+    \item \textbf{Communicatie met stakeholders}: Regelmatig overleg met TurnUp over requirements en feedback verwerken in het systeem.
+
+    \item \textbf{Iteratief ontwikkelen}: Het belang van kleine, testbare incrementen in plaats van grote releases.
+\end{itemize}
+
+\section{Vergelijking met doelstellingen}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{6cm}cc}
+\toprule
+\textbf{Doelstelling} & \textbf{Doel} & \textbf{Bereikt} \\
+\midrule
+Gesprekken zonder menselijke tussenkomst & Ja & Ja \\
+Gemiddelde gespreksduur & < 3 min & < 2 min \\
+24/7 beschikbaarheid & Ja & Ja \\
+Latency vraag-antwoord & < 2 sec & 2-4 sec* \\
+Meertalige ondersteuning & 3 talen & 3 talen \\
+\bottomrule
+\end{tabular}
+\caption[Doelstellingen]{Vergelijking van doelstellingen met bereikte resultaten. *Latency hoger dan doel maar acceptabel voor gebruikers.}
+\end{table}
+
+De latency-doelstelling van minder dan 2 seconden werd niet volledig gehaald. De werkelijke latency van 2-4 seconden is voornamelijk te wijten aan de verwerkingstijd van OpenAI. Dit bleek in de praktijk geen probleem voor de gebruikerservaring, aangezien patiënten gewend zijn aan korte wachttijden tijdens telefoongesprekken.
+
+\section{Beperkingen}
+
+Het huidige systeem kent enkele beperkingen:
+
+\begin{itemize}
+    \item \textbf{Complexe vragen}: Vragen die buiten het afspraakdomein vallen kunnen niet worden beantwoord.
+    \item \textbf{Accenten en dialecten}: Sterke accenten kunnen de spraakherkenning bemoeilijken.
+    \item \textbf{Achtergrondlawaai}: In lawaaiige omgevingen daalt de kwaliteit van de spraakherkenning.
+    \item \textbf{Geen proactieve acties}: Het systeem kan momenteel geen uitgaande oproepen doen (bijvoorbeeld herinneringen).
+\end{itemize}
+
+\section{Feedback van stakeholders}
+
+TurnUp heeft positief gereageerd op het ontwikkelde systeem. Specifieke feedback:
+
+\begin{quote}
+``Het systeem handelt de meeste standaard scenario's goed af. De meertalige ondersteuning is een grote meerwaarde voor onze Belgische klanten. We zien potentieel voor uitrol naar meerdere praktijken.''
+\end{quote}
+
+Verbeterpunten die werden aangedragen:
+\begin{itemize}
+    \item Meer edge cases afhandelen (bijvoorbeeld gecombineerde vragen)
+    \item Kortere antwoorden in sommige scenario's
+    \item Betere afhandeling van onduidelijke spraak
+\end{itemize}

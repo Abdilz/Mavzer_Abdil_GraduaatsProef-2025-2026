@@ -1,51 +1,185 @@
 \chapter{\IfLanguageName{dutch}{Stand van zaken}{State of the art}}%
 \label{ch:stand-van-zaken}
 
-% Tip: Begin elk hoofdstuk met een paragraaf inleiding die beschrijft hoe
-% dit hoofdstuk past binnen het geheel van de graduaatsproef. Geef in het
-% bijzonder aan wat de link is met het vorige en volgende hoofdstuk.
+Dit hoofdstuk biedt een overzicht van de technologieën en concepten die ten grondslag liggen aan dit project. We bespreken achtereenvolgens de evolutie van AI in klantenservice, de werking van de gebruikte platformen (Twilio en OpenAI), en de architecturale overwegingen voor real-time spraakverwerking.
 
-% Pas na deze inleidende paragraaf komt de eerste sectiehoofding.
+\section{Kunstmatige intelligentie in klantenservice}
 
-Dit hoofdstuk bevat je literatuurstudie. De inhoud gaat verder op de inleiding, maar zal het onderwerp van de graduaatsproef *diepgaand* uitspitten. De bedoeling is dat de lezer na lezing van dit hoofdstuk helemaal op de hoogte is van de huidige stand van zaken (state-of-the-art) in het onderzoeksdomein. Iemand die niet vertrouwd is met het onderwerp, weet nu voldoende om de rest van het verhaal te kunnen volgen, zonder dat die er nog andere informatie moet over opzoeken \autocite{Pollefliet2011}.
+De inzet van AI voor klantenservice is de afgelopen jaren exponentieel gegroeid. Waar vroeger eenvoudige Interactive Voice Response (IVR) systemen met vaste menu's de norm waren, maken moderne systemen gebruik van Natural Language Processing (NLP) om natuurlijke gesprekken te voeren~\autocite{OpenAI2023}.
 
-Je verwijst bij elke bewering die je doet, vakterm die je introduceert, enz.\ naar je bronnen. In \LaTeX{} kan dat met het commando \texttt{$\backslash${textcite\{\}}} of \texttt{$\backslash${autocite\{\}}}. Als argument van het commando geef je de ``sleutel'' van een ``record'' in een bibliografische databank in het Bib\LaTeX{}-formaat (een tekstbestand). Als je expliciet naar de auteur verwijst in de zin (narratieve referentie), gebruik je \texttt{$\backslash${}textcite\{\}}. Soms is de auteursnaam niet expliciet een onderdeel van de zin, dan gebruik je \texttt{$\backslash${}autocite\{\}} (referentie tussen haakjes). Dit gebruik je bv.~bij een citaat, of om in het bijschrift van een overgenomen afbeelding, broncode, tabel, enz. te verwijzen naar de bron. In de volgende paragraaf een voorbeeld van elk.
+\subsection{Van IVR naar conversationele AI}
 
-\textcite{Knuth1998} schreef een van de standaardwerken over sorteer- en zoekalgoritmen. Experten zijn het erover eens dat cloud computing een interessante opportuniteit vormen, zowel voor gebruikers als voor dienstverleners op vlak van informatietechnologie~\autocite{Creeger2009}.
+Traditionele IVR-systemen werken met vooraf gedefinieerde keuzemenu's: ``Druk 1 voor afspraken, druk 2 voor facturatie.'' Deze aanpak heeft significante beperkingen:
 
-Let er ook op: het \texttt{cite}-commando voor de punt, dus binnen de zin. Je verwijst meteen naar een bron in de eerste zin die erop gebaseerd is, dus niet pas op het einde van een paragraaf.
+\begin{itemize}
+    \item Gebruikers moeten door lange menu's navigeren
+    \item Complexe vragen kunnen niet worden afgehandeld
+    \item De gebruikerservaring is vaak frustrerend
+\end{itemize}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.8\textwidth]{grail.jpg}
-  \caption[Voorbeeld figuur.]{\label{fig:grail}Voorbeeld van invoegen van een figuur. Zorg altijd voor een uitgebreid bijschrift dat de figuur volledig beschrijft zonder in de tekst te moeten gaan zoeken. Vergeet ook je bronvermelding niet!}
-\end{figure}
+Conversationele AI-systemen daarentegen begrijpen natuurlijke taal en kunnen contextbewust reageren. Large Language Models (LLMs) zoals GPT-4 hebben deze transitie mogelijk gemaakt door hun vermogen om menselijke taal te begrijpen en te genereren~\autocite{OpenAI2024}.
+
+\subsection{Function calling: de brug tussen taal en actie}
+
+Een cruciale ontwikkeling voor dit project is OpenAI's function calling mechanisme. Dit stelt het taalmodel in staat om niet alleen tekst te genereren, maar ook gestructureerde acties uit te voeren. Het model kan herkennen wanneer een gebruiker een specifieke actie wil (bijvoorbeeld een afspraak annuleren) en de juiste functie aanroepen met de correcte parameters~\autocite{OpenAI2024}.
+
+\section{Twilio: programmeerbare telefonie}
+
+Twilio is een cloud communications platform dat API's aanbiedt voor spraak, SMS, en andere communicatiekanalen. Voor dit project zijn de volgende Twilio-componenten relevant~\autocite{Twilio2024}:
+
+\subsection{Programmable Voice}
+
+Twilio's Programmable Voice API maakt het mogelijk om:
+
+\begin{itemize}
+    \item Inkomende oproepen te ontvangen op een virtueel telefoonnummer
+    \item Oproepen te beantwoorden met vooraf opgenomen of dynamisch gegenereerde audio
+    \item Spraakherkenning (Speech-to-Text) uit te voeren
+    \item Text-to-Speech te gebruiken voor gesproken antwoorden
+    \item Oproepen door te verbinden naar andere nummers
+\end{itemize}
+
+\subsection{TwiML: Twilio Markup Language}
+
+De communicatie met Twilio verloopt via TwiML, een XML-gebaseerde markup language. Een typisch TwiML-antwoord ziet er als volgt uit:
 
 \begin{listing}
-  \begin{minted}{python}
-    import pandas as pd
-    import seaborn as sns
-
-    penguins = sns.load_dataset('penguins')
-    sns.relplot(data=penguins, x="flipper_length_mm", y="bill_length_mm", hue="species")
-  \end{minted}
-  \caption[Voorbeeld codefragment]{Voorbeeld van het invoegen van een codefragment.}
+\begin{minted}{xml}
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say voice="Polly.Ruben" language="nl-NL">
+        Welkom bij de tandartspraktijk. Waarmee kan ik u helpen?
+    </Say>
+    <Gather input="speech"
+           speechTimeout="auto"
+           language="nl-NL"
+           action="/api/twilio/process-speech">
+    </Gather>
+</Response>
+\end{minted}
+\caption[TwiML voorbeeld]{Voorbeeld van een TwiML-response met spraakherkenning}
 \end{listing}
 
-\lipsum[7-20]
+\subsection{Webhooks en real-time verwerking}
 
-\begin{table}
-  \centering
-  \begin{tabular}{lcr}
-    \toprule
-    \textbf{Kolom 1} & \textbf{Kolom 2} & \textbf{Kolom 3} \\
-    $\alpha$         & $\beta$          & $\gamma$         \\
-    \midrule
-    A                & 10.230           & a                \\
-    B                & 45.678           & b                \\
-    C                & 99.987           & c                \\
-    \bottomrule
-  \end{tabular}
-  \caption[Voorbeeld tabel]{\label{tab:example}Voorbeeld van een tabel.}
-\end{table}
+Twilio communiceert met de backend via webhooks. Bij elke fase van het gesprek (nieuwe oproep, spraakherkenning voltooid, oproep beëindigd) stuurt Twilio een HTTP POST request naar de geconfigureerde endpoint. Dit vereist dat de backend snel kan reageren—Twilio hanteert een timeout van 15 seconden~\autocite{Twilio2024}.
 
+\section{OpenAI en Large Language Models}
+
+OpenAI's GPT-modellen vormen het hart van de AI-assistent. Deze modellen zijn getraind op grote hoeveelheden tekstdata en kunnen menselijke taal begrijpen en genereren.
+
+\subsection{Het GPT-model}
+
+GPT (Generative Pre-trained Transformer) is een type neuraal netwerk dat geoptimaliseerd is voor taaltaken. Het model werkt door te voorspellen wat het volgende woord in een zin zou moeten zijn, gegeven de voorgaande context. Door miljarden parameters en enorme trainingsdata kan het model:
+
+\begin{itemize}
+    \item Natuurlijke conversaties voeren
+    \item Context over meerdere berichten onthouden
+    \item Intenties herkennen uit ongestructureerde input
+    \item Meertalige ondersteuning bieden
+\end{itemize}
+
+\subsection{Function calling in detail}
+
+Het function calling mechanisme werkt als volgt~\autocite{OpenAI2024}:
+
+\begin{enumerate}
+    \item De ontwikkelaar definieert beschikbare functies met hun parameters in JSON Schema formaat
+    \item Het model ontvangt de gebruikersinput samen met de functiedefinities
+    \item Het model bepaalt of een functie moet worden aangeroepen en met welke argumenten
+    \item De backend voert de functie uit en geeft het resultaat terug aan het model
+    \item Het model formuleert een natuurlijk antwoord voor de gebruiker
+\end{enumerate}
+
+Een voorbeeld van een functiedefinitie:
+
+\begin{listing}
+\begin{minted}{json}
+{
+    "name": "cancel_appointment",
+    "description": "Annuleert de geselecteerde afspraak",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "reservationId": {
+                "type": "string",
+                "description": "Het unieke ID van de afspraak"
+            }
+        },
+        "required": ["reservationId"]
+    }
+}
+\end{minted}
+\caption[Function calling definitie]{Voorbeeld van een function calling definitie voor afspraakannulering}
+\end{listing}
+
+\section{ASP.NET Core en Azure}
+
+De backend van het systeem is gebouwd met ASP.NET Core, Microsoft's cross-platform framework voor webapplicaties. De keuze voor dit framework is gebaseerd op:
+
+\begin{itemize}
+    \item Integratie met de bestaande TurnUp-infrastructuur (ook .NET-gebaseerd)
+    \item Uitstekende ondersteuning voor asynchrone verwerking
+    \item Native Azure-integratie
+    \item Hoge performance voor real-time toepassingen
+\end{itemize}
+
+\subsection{Azure-services}
+
+Het systeem maakt gebruik van verschillende Azure-services~\autocite{Microsoft2024}:
+
+\begin{itemize}
+    \item \textbf{Azure App Service}: Hosting van de webapplicatie
+    \item \textbf{Azure Key Vault}: Veilige opslag van API-sleutels en secrets
+    \item \textbf{Azure Blob Storage}: Opslag van gespreksopnames
+    \item \textbf{Azure Monitor}: Logging en monitoring van het systeem
+\end{itemize}
+
+\section{Vergelijkbare systemen}
+
+Er bestaan reeds verschillende commerciële oplossingen voor AI-gestuurde telefonie:
+
+\begin{itemize}
+    \item \textbf{Google Dialogflow}: Biedt conversationele AI maar vereist aparte telefonie-integratie
+    \item \textbf{Amazon Connect}: Volledige callcenter-oplossing maar complexer en duurder
+    \item \textbf{Twilio Flex}: Contact center platform maar vereist meer configuratie
+\end{itemize}
+
+Het voordeel van een custom oplossing met Twilio en OpenAI is de volledige controle over de gebruikerservaring en de mogelijkheid tot diepe integratie met bestaande systemen zoals de TurnUp API.
+
+\section{Uitdagingen en overwegingen}
+
+Bij het bouwen van een AI-gestuurd callcenter moeten verschillende uitdagingen worden aangepakt:
+
+\subsection{Latency}
+
+De totale tijd tussen het moment dat een gebruiker spreekt en het moment dat het antwoord wordt afgespeeld bestaat uit:
+
+\begin{enumerate}
+    \item Spraakherkenning (Speech-to-Text): 0.5--2 seconden
+    \item API-aanroep naar OpenAI: 1--3 seconden
+    \item Text-to-Speech generatie: 0.3--1 seconde
+\end{enumerate}
+
+Om binnen Twilio's 15-seconden timeout te blijven, is optimalisatie cruciaal. Het gebruik van streaming responses en caching van veelvoorkomende antwoorden kan helpen.
+
+\subsection{Foutafhandeling}
+
+Een robuust systeem moet omgaan met:
+
+\begin{itemize}
+    \item Onverstaanbare spraak (achtergrondlawaai, accenten)
+    \item Onverwachte gebruikersintentie
+    \item API-fouten van Twilio of OpenAI
+    \item Netwerkproblemen
+\end{itemize}
+
+\subsection{Privacy en veiligheid}
+
+Telefoongesprekken bevatten persoonlijke gegevens en vallen onder de GDPR. Het systeem moet:
+
+\begin{itemize}
+    \item Gebruikers informeren over opname
+    \item Data veilig opslaan en verwerken
+    \item Toegang tot gegevens beperken tot geautoriseerde partijen
+\end{itemize}

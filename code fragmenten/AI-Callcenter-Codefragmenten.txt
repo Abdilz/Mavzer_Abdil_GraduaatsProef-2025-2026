@@ -1,0 +1,679 @@
+================================================================================
+                    CODEFRAGMENTEN - AI CALLCENTER PROJECT
+                         Abdil Mavzer - Graduaatsproef
+                              HOGENT 2025-2026
+================================================================================
+
+Dit document bevat codefragmenten die de kernconcepten demonstreren van het
+AI-gestuurd callcenter project zonder bedrijfsgevoelige informatie.
+
+Gebruikte NuGet packages:
+- Twilio (versie 7.0.5)
+- Twilio.AspNet.Mvc (versie 8.0.2)
+- Azure.AI.OpenAI
+
+================================================================================
+                         HOE WERKT HET SYSTEEM?
+                    (Stap-voor-stap uitleg van de flow)
+================================================================================
+
+Het AI-callcenter werkt als een continue lus tussen de patiënt, Twilio en OpenAI.
+Hieronder wordt elke stap in detail uitgelegd:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           STAP 1: PATIËNT BELT                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   De patiënt belt naar het Twilio telefoonnummer van de tandartspraktijk.   │
+│   Twilio ontvangt de oproep en stuurt een HTTP POST request naar onze       │
+│   ASP.NET Core backend (webhook).                                           │
+│                                                                             │
+│   Twilio → POST /api/twilio/incoming-call                                   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         STAP 2: TAALKEUZE (IVR)                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   De backend stuurt een TwiML response terug met een IVR-menu:              │
+│   "Press 1 for English. Druk 2 voor Nederlands. Appuyez 3 pour français."   │
+│                                                                             │
+│   Twilio speelt dit af en wacht op een toetsdruk (DTMF).                    │
+│   De patiënt drukt op 1, 2 of 3.                                            │
+│                                                                             │
+│   Twilio → POST /api/twilio/language-selected (met Digits=2)                │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    STAP 3: CONVERSATIE START                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   Op basis van de taalkeuze:                                                │
+│   - Wordt een unieke conversationId aangemaakt (GUID)                       │
+│   - Wordt de juiste taal en stem geselecteerd (Polly.Ruben voor NL)         │
+│   - Wordt een begroeting afgespeeld                                         │
+│   - Wordt spraakherkenning geactiveerd via <Gather>                         │
+│                                                                             │
+│   De patiënt spreekt: "Ik wil mijn afspraak annuleren"                      │
+│                                                                             │
+│   Twilio → POST /api/twilio/process-speech/{conversationId}                 │
+│            (met SpeechResult="Ik wil mijn afspraak annuleren")              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    STAP 4: OPENAI VERWERKING                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   De backend stuurt de spraaktekst naar OpenAI GPT met:                     │
+│   - System prompt (taalinstructies, beschikbare functies)                   │
+│   - Conversatiegeschiedenis (vorige berichten)                              │
+│   - Function definitions (lookup_customer, cancel_appointment, etc.)        │
+│                                                                             │
+│   OpenAI analyseert de intentie en beslist:                                 │
+│   → "De patiënt wil annuleren, maar ik ken hem nog niet"                    │
+│   → Roept function "lookup_customer" aan met het telefoonnummer             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    STAP 5: FUNCTION EXECUTION                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   De backend voert de functie uit:                                          │
+│   - lookup_customer → Zoekt patiënt in TurnUp database                      │
+│   - Retourneert: naam, klant-ID, afspraken, praktijken enz                                  │
+│                                                                             │
+│   Het resultaat gaat terug naar OpenAI:                                     │
+│   {                                                                         │
+│     "found": true,                                                          │
+│     "firstName": "Jan",                                                     │
+│     "lastName": "Peeters",                                                  │
+│     "appointments": [{ "date": "2026-02-15", "time": "10:00" }]             │
+│   }                                                                         │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    STAP 6: AI GENEREERT ANTWOORD                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   OpenAI gebruikt de functie-resultaten om een natuurlijk antwoord te       │
+│   genereren:                                                                │
+│                                                                             │
+│   "Goedemiddag meneer Peeters. Ik zie dat u een afspraak heeft op           │
+│    15 februari om 10 uur. Wilt u deze afspraak annuleren?"                  │
+│                                                                             │
+│   Dit antwoord wordt omgezet naar TwiML met de juiste stem (Polly.Ruben).   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    STAP 7: TWILIO SPREEKT                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   Twilio ontvangt de TwiML response:                                        │
+│   <Response>                                                                │
+│     <Say voice="Polly.Ruben">Goedemiddag meneer Peeters...</Say>            │
+│     <Gather input="speech" language="nl-be"                                 │
+│            action="/api/twilio/process-speech/{conversationId}">            │
+│     </Gather>                                                               │
+│   </Response>                                                               │
+│                                                                             │
+│   - Twilio spreekt het antwoord uit via Amazon Polly                        │
+│   - Luistert naar het volgende antwoord van de patiënt                      │
+│   - De cyclus herhaalt zich (terug naar stap 4)                             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    STAP 8: ACTIE UITVOEREN                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   Na bevestiging van de patiënt ("Ja, graag annuleren"):                    │
+│                                                                             │
+│   - OpenAI roept "cancel_appointment" aan                                   │
+│   - Backend annuleert de afspraak in TurnUp systeem                         │
+│   - Bevestiging wordt teruggegeven aan de patiënt                           │
+│   - Gesprek wordt beëindigd met <Hangup>                                    │
+│                                                                             │
+│   "Uw afspraak van 15 februari is geannuleerd. Tot ziens!"                  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+              VISUEEL OVERZICHT - COMPLETE SYSTEEMARCHITECTUUR
+================================================================================
+
+    ┌──────────┐         ┌──────────┐         ┌──────────────────┐
+    │ PATIËNT  │ ──────▶ │  TWILIO  │ ──────▶ │   ASP.NET CORE   │
+    │          │ ◀────── │          │ ◀────── │   (Backend)      │
+    └──────────┘         └──────────┘         └────────┬─────────┘
+       Telefoon           Cloud Telefonie              │
+       Spraak/DTMF        Speech-to-Text               │
+                          Text-to-Speech               │
+                                                       │
+                                              ┌────────▼─────────┐
+                                              │    OPENAI GPT    │
+                                              │                  │
+                                              │  - Intentie      │
+                                              │  - Function Call │
+                                              │  - Antwoord      │
+                                              └────────┬─────────┘
+                                                       │
+                                              ┌────────▼─────────┐
+                                              │   TURNUP API     │
+                                              │                  │
+                                              │  - Klantdata     │
+                                              │  - Afspraken     │
+                                              │  - Acties        │
+                                              └──────────────────┘
+
+
+================================================================================
+                              CODEFRAGMENTEN
+================================================================================
+
+
+--------------------------------------------------------------------------------
+FRAGMENT 1: INCOMING CALL WEBHOOK
+--------------------------------------------------------------------------------
+Beschrijving: Dit endpoint wordt aangeroepen wanneer iemand belt naar het
+Twilio nummer. Het speelt een IVR-menu af voor taalkeuze.
+
+[HttpPost("incoming-call")]
+public IActionResult IncomingCall()
+{
+    var response = new VoiceResponse();
+
+    // Taalkeuze menu (NL/EN/FR)
+    response.Say("Press 1 for English. Druk 2 voor Nederlands. Appuyez 3 pour français.",
+        voice: "Polly.Joanna");
+
+    response.Gather(
+        numDigits: 1,
+        action: new Uri("/api/twilio/language-selected", UriKind.Relative),
+        method: HttpMethod.Post
+    );
+
+    return Content(response.ToString(), "application/xml");
+}
+
+
+--------------------------------------------------------------------------------
+FRAGMENT 2: LANGUAGE SELECTION
+--------------------------------------------------------------------------------
+Beschrijving: Verwerkt de taalkeuze en start de conversatie in de gekozen taal
+met de juiste Amazon Polly stem.
+
+[HttpPost("language-selected")]
+public IActionResult LanguageSelected([FromForm] string Digits)
+{
+    var (locale, voice, greeting) = Digits switch
+    {
+        "1" => ("en-us", "Polly.Joanna", "Hello, how can I help you today?"),
+        "2" => ("nl-be", "Polly.Ruben", "Hallo, hoe kan ik u vandaag helpen?"),
+        "3" => ("fr-fr", "Polly.Mathieu", "Bonjour, comment puis-je vous aider?"),
+        _ => ("en-us", "Polly.Joanna", "Hello, how can I help you?")
+    };
+
+    // Start conversatie met gekozen taal
+    var conversationId = Guid.NewGuid().ToString();
+    _conversationService.CreateConversation(conversationId, locale);
+
+    var response = new VoiceResponse();
+    response.Say(greeting, voice: voice);
+    response.Gather(
+        input: new[] { Gather.InputEnum.Speech },
+        language: locale,
+        action: new Uri($"/api/twilio/process-speech/{conversationId}", UriKind.Relative)
+    );
+
+    return Content(response.ToString(), "application/xml");
+}
+
+
+--------------------------------------------------------------------------------
+FRAGMENT 3: SPEECH PROCESSING
+--------------------------------------------------------------------------------
+Beschrijving: Ontvangt spraak van de patiënt, stuurt naar OpenAI, en genereert
+een TwiML response. Inclusief timeout handling (Twilio heeft max 15 sec).
+
+[HttpPost("process-speech/{conversationId}")]
+public async Task<IActionResult> ProcessSpeech(
+    string conversationId,
+    [FromForm] string SpeechResult)
+{
+    var response = new VoiceResponse();
+
+    try
+    {
+        // Twilio timeout is 15 sec - we gebruiken 14 sec voor veiligheid
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(14));
+
+        // Stuur spraak naar OpenAI voor verwerking
+        var aiResponse = await _openAiService.ProcessUserInputAsync(
+            conversationId,
+            SpeechResult,
+            cts.Token
+        );
+
+        // Bepaal stem op basis van taal
+        var context = _conversationService.GetContext(conversationId);
+        var voice = context.Locale switch
+        {
+            "nl-be" => "Polly.Ruben",
+            "fr-fr" => "Polly.Mathieu",
+            _ => "Polly.Joanna"
+        };
+
+        // Genereer TwiML antwoord
+        response.Say(aiResponse.Message, voice: voice);
+
+        if (!aiResponse.EndConversation)
+        {
+            response.Gather(
+                input: new[] { Gather.InputEnum.Speech },
+                language: context.Locale,
+                action: new Uri($"/api/twilio/process-speech/{conversationId}", UriKind.Relative)
+            );
+        }
+    }
+    catch (OperationCanceledException)
+    {
+        // Timeout - vraag om herhaling
+        response.Say("Sorry, kunt u dat herhalen?", voice: "Polly.Ruben");
+        response.Gather(
+            input: new[] { Gather.InputEnum.Speech },
+            action: new Uri($"/api/twilio/process-speech/{conversationId}", UriKind.Relative)
+        );
+    }
+
+    return Content(response.ToString(), "application/xml");
+}
+
+
+--------------------------------------------------------------------------------
+FRAGMENT 4: OPENAI FUNCTION DEFINITIONS
+--------------------------------------------------------------------------------
+Beschrijving: Definieert de 5 kernfuncties die de AI kan aanroepen.
+OpenAI kiest automatisch de juiste functie op basis van de intentie.
+
+private List<ChatTool> GetAvailableFunctions()
+{
+    return new List<ChatTool>
+    {
+        // 1. LOOKUP_CUSTOMER - Patiëntgegevens ophalen via telefoonnummer
+        ChatTool.CreateFunctionTool(
+            functionName: "lookup_customer",
+            functionDescription: "Look up customer information by phone number",
+            functionParameters: BinaryData.FromObjectAsJson(new {
+                type = "object",
+                properties = new {
+                    phoneNumber = new {
+                        type = "string",
+                        description = "The caller's phone number in E.164 format"
+                    }
+                },
+                required = new[] { "phoneNumber" }
+            })
+        ),
+
+        // 2. CANCEL_APPOINTMENT - Afspraak annuleren
+        ChatTool.CreateFunctionTool(
+            functionName: "cancel_appointment",
+            functionDescription: "Cancel an existing appointment",
+            functionParameters: BinaryData.FromObjectAsJson(new {
+                type = "object",
+                properties = new {
+                    appointmentId = new { type = "string" },
+                    reason = new { type = "string" }
+                },
+                required = new[] { "appointmentId" }
+            })
+        ),
+
+        // 3. RESCHEDULE_APPOINTMENT - Afspraak verzetten
+        ChatTool.CreateFunctionTool(
+            functionName: "reschedule_appointment",
+            functionDescription: "Reschedule an appointment to a new date/time",
+            functionParameters: BinaryData.FromObjectAsJson(new {
+                type = "object",
+                properties = new {
+                    appointmentId = new { type = "string" },
+                    newDate = new { type = "string", format = "date" },
+                    newTime = new { type = "string", format = "time" }
+                },
+                required = new[] { "appointmentId", "newDate", "newTime" }
+            })
+        ),
+
+        // 4. ADD_TO_WAITLIST - Toevoegen aan wachtlijst
+        ChatTool.CreateFunctionTool(
+            functionName: "add_to_waitlist",
+            functionDescription: "Add patient to cancellation waitlist",
+            functionParameters: BinaryData.FromObjectAsJson(new {
+                type = "object",
+                properties = new {
+                    customerId = new { type = "string" },
+                    preferredDays = new {
+                        type = "array",
+                        items = new { type = "string" }
+                    }
+                },
+                required = new[] { "customerId" }
+            })
+        ),
+
+        // 5. TRANSFER_TO_PRACTICE - Doorverbinden naar receptie
+        ChatTool.CreateFunctionTool(
+            functionName: "transfer_to_practice",
+            functionDescription: "Transfer call to human receptionist",
+            functionParameters: BinaryData.FromObjectAsJson(new {
+                type = "object",
+                properties = new {
+                    reason = new { type = "string" }
+                }
+            })
+        )
+    };
+}
+
+
+--------------------------------------------------------------------------------
+FRAGMENT 5: LOOKUP CUSTOMER IMPLEMENTATIE
+--------------------------------------------------------------------------------
+Beschrijving: Zoekt een klant op basis van telefoonnummer en retourneert
+de klantgegevens en aankomende afspraken.
+
+private async Task<string> LookupCustomerAsync(string phoneNumber)
+{
+    // Normaliseer telefoonnummer naar E.164 formaat (+32...)
+    var normalizedPhone = NormalizePhoneNumber(phoneNumber);
+
+    // Zoek klant in database
+    var customer = await _customerRepository.GetByPhoneNumberAsync(normalizedPhone);
+
+    if (customer == null)
+    {
+        return JsonSerializer.Serialize(new {
+            found = false,
+            message = "No customer found with this phone number"
+        });
+    }
+
+    // Haal aankomende afspraken op
+    var appointments = await _appointmentRepository
+        .GetUpcomingByCustomerIdAsync(customer.Id);
+
+    return JsonSerializer.Serialize(new {
+        found = true,
+        customerId = customer.Id,
+        firstName = customer.FirstName,
+        lastName = customer.LastName,
+        appointments = appointments.Select(a => new {
+            appointmentId = a.Id,
+            date = a.Date.ToString("yyyy-MM-dd"),
+            time = a.Time.ToString("HH:mm"),
+            treatmentType = a.TreatmentType,
+            dentist = a.DentistName
+        })
+    });
+}
+
+// Helper: Telefoonnummer normaliseren
+private string NormalizePhoneNumber(string phoneNumber)
+{
+    // Verwijder spaties, streepjes en haakjes
+    var cleaned = Regex.Replace(phoneNumber, @"[\s\-\(\)]", "");
+
+    // Voeg Belgische landcode toe indien nodig
+    if (cleaned.StartsWith("0"))
+        cleaned = "+32" + cleaned.Substring(1);
+    else if (!cleaned.StartsWith("+"))
+        cleaned = "+32" + cleaned;
+
+    return cleaned;
+}
+
+
+--------------------------------------------------------------------------------
+FRAGMENT 6: FUNCTION EXECUTION HANDLER
+--------------------------------------------------------------------------------
+Beschrijving: Voert de door OpenAI gekozen functie uit en retourneert
+het resultaat terug naar de AI.
+
+private async Task<string> ExecuteFunctionAsync(string functionName, string arguments)
+{
+    var args = JsonSerializer.Deserialize<JsonElement>(arguments);
+
+    return functionName switch
+    {
+        "lookup_customer" => await LookupCustomerAsync(
+            args.GetProperty("phoneNumber").GetString()!
+        ),
+
+        "cancel_appointment" => await CancelAppointmentAsync(
+            args.GetProperty("appointmentId").GetString()!,
+            args.TryGetProperty("reason", out var reason) ? reason.GetString() : null
+        ),
+
+        "reschedule_appointment" => await RescheduleAppointmentAsync(
+            args.GetProperty("appointmentId").GetString()!,
+            args.GetProperty("newDate").GetString()!,
+            args.GetProperty("newTime").GetString()!
+        ),
+
+        "add_to_waitlist" => await AddToWaitlistAsync(
+            args.GetProperty("customerId").GetString()!,
+            args.TryGetProperty("preferredDays", out var days)
+                ? days.EnumerateArray().Select(d => d.GetString()!).ToList()
+                : null
+        ),
+
+        "transfer_to_practice" => TransferToPractice(
+            args.TryGetProperty("reason", out var r) ? r.GetString() : "Requested"
+        ),
+
+        _ => "Unknown function"
+    };
+}
+
+
+--------------------------------------------------------------------------------
+FRAGMENT 7: SYSTEM PROMPT BUILDER
+--------------------------------------------------------------------------------
+Beschrijving: Bouwt de instructies voor de AI-assistent inclusief
+taalinstructies en klantcontext.
+
+private string BuildSystemPrompt(string locale, CustomerInfo? customer)
+{
+    var languageInstruction = locale switch
+    {
+        "nl-be" => "You MUST respond ONLY in Dutch (Belgian).",
+        "fr-fr" => "You MUST respond ONLY in French.",
+        _ => "You MUST respond ONLY in English."
+    };
+
+    var customerContext = customer != null
+        ? $"The caller is {customer.FirstName} {customer.LastName}. " +
+          $"They have {customer.Appointments.Count} upcoming appointments."
+        : "The caller has not been identified yet.";
+
+    return $"""
+        You are a helpful AI assistant for a dental practice.
+        {languageInstruction}
+
+        {customerContext}
+
+        You can help patients with:
+        - Viewing their appointments
+        - Cancelling appointments
+        - Rescheduling appointments
+        - Adding them to the waitlist
+        - Transferring to a human receptionist
+
+        Keep responses brief (max 2 sentences).
+        Always confirm actions before executing them.
+        """;
+}
+
+
+--------------------------------------------------------------------------------
+FRAGMENT 8: CONVERSATION CONTEXT CLASS
+--------------------------------------------------------------------------------
+Beschrijving: Houdt de staat van een gesprek bij over meerdere beurten.
+
+public class ConversationContext
+{
+    public string ConversationId { get; set; } = string.Empty;
+    public string Locale { get; set; } = "en-us";
+    public string CallerPhoneNumber { get; set; } = string.Empty;
+    public List<ChatMessage> Messages { get; set; } = new();
+    public CustomerInfo? Customer { get; set; }
+    public DateTime StartedAt { get; set; } = DateTime.UtcNow;
+
+    public bool IsIdentified => Customer != null;
+
+    public void AddUserMessage(string content)
+    {
+        Messages.Add(new ChatMessage(ChatRole.User, content));
+    }
+
+    public void AddAssistantMessage(string content)
+    {
+        Messages.Add(new ChatMessage(ChatRole.Assistant, content));
+    }
+}
+
+
+--------------------------------------------------------------------------------
+FRAGMENT 9: TWIML RESPONSE GENERATOR
+--------------------------------------------------------------------------------
+Beschrijving: Genereert TwiML responses met de juiste stem en Gather
+configuratie voor het volgende antwoord.
+
+private IActionResult GenerateTwimlResponse(
+    string message,
+    string conversationId,
+    string locale,
+    bool endConversation = false)
+{
+    var response = new VoiceResponse();
+
+    // Selecteer stem op basis van taal
+    var voice = locale switch
+    {
+        "nl-be" => "Polly.Ruben",
+        "fr-fr" => "Polly.Mathieu",
+        _ => "Polly.Joanna"
+    };
+
+    // Spreek antwoord uit
+    response.Say(message, voice: voice);
+
+    if (!endConversation)
+    {
+        // Luister naar volgend antwoord
+        response.Gather(
+            input: new[] { Gather.InputEnum.Speech },
+            language: locale,
+            speechTimeout: "auto",
+            action: new Uri($"/api/twilio/process-speech/{conversationId}", UriKind.Relative)
+        );
+    }
+    else
+    {
+        response.Hangup();
+    }
+
+    return Content(response.ToString(), "application/xml");
+}
+
+
+--------------------------------------------------------------------------------
+FRAGMENT 10: TRANSFER TO PRACTICE
+--------------------------------------------------------------------------------
+Beschrijving: Verbindt het gesprek door naar een menselijke receptionist.
+
+private string TransferToPractice(string reason)
+{
+    _logger.LogInformation("Transferring call. Reason: {Reason}", reason);
+
+    return JsonSerializer.Serialize(new {
+        action = "transfer",
+        message = "Ik verbind u door met een medewerker. Een moment geduld."
+    });
+}
+
+// TwiML voor doorverbinden
+private IActionResult HandleTransfer(string message, string transferTo, string locale)
+{
+    var response = new VoiceResponse();
+    var voice = locale == "nl-be" ? "Polly.Ruben" : "Polly.Joanna";
+
+    response.Say(message, voice: voice);
+    response.Dial(transferTo);
+
+    return Content(response.ToString(), "application/xml");
+}
+
+
+================================================================================
+                         VOORBEELD CONVERSATIE
+================================================================================
+
+Dit is een voorbeeld van hoe een typisch gesprek verloopt:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TWILIO:    "Druk 2 voor Nederlands"                                         │
+│ PATIËNT:   *drukt 2*                                                        │
+│                                                                             │
+│ AI:        "Hallo, hoe kan ik u vandaag helpen?"                             │
+│ PATIËNT:   "Ik wil mijn afspraak annuleren"                                 │
+│                                                                             │
+│ [OpenAI roept lookup_customer aan met telefoonnummer]                       │
+│ [Backend retourneert: Jan Peeters, afspraak 15 feb 10:00]                   │
+│                                                                             │
+│ AI:        "Goedemiddag meneer Peeters. Ik zie dat u een afspraak heeft     │
+│             op 15 februari om 10 uur. Wilt u deze annuleren?"               │
+│ PATIËNT:   "Ja graag"                                                       │
+│                                                                             │
+│ [OpenAI roept cancel_appointment aan]                                       │
+│ [Backend annuleert afspraak in TurnUp systeem]                              │
+│                                                                             │
+│ AI:        "Uw afspraak is geannuleerd. Kan ik u nog ergens mee helpen?"    │
+│ PATIËNT:   "Nee, bedankt"                                                   │
+│                                                                             │
+│ AI:        "Graag gedaan. Tot ziens!"                                       │
+│ [Gesprek beëindigd]                                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+                                EINDE DOCUMENT
+================================================================================
+
+Dit document bevat codefragmenten die de kernconcepten demonstreren van het
+AI-gestuurd callcenter project zonder bedrijfsgevoelige informatie.
+
+Technologieën:
+- Twilio Programmable Voice (webhooks, TwiML, Speech-to-Text)
+- OpenAI GPT met Function Calling
+- ASP.NET Core Web API
+- Azure Key Vault (secrets)
+- Amazon Polly (Text-to-Speech stemmen)
+
+Auteur: Abdil Mavzer
+Opleiding: Graduaat Programmeren - HOGENT
+Academiejaar: 2025-2026
